@@ -4,14 +4,14 @@ Generated automatically by
 [`traffic-stats.yml`](../../blob/main/.github/workflows/traffic-stats.yml).
 Do not edit by hand — this branch is overwritten on every run.
 
-**Last updated:** 2026-08-18 · **Tracking since:** 2026-08-04 (14 days)
+**Last updated:** 2026-08-18 · **Tracking since:** 2026-08-02 (16 days)
 
 | Metric | Total |
 |---|---|
-| Clones | 343 |
-| Unique cloners | 193 |
-| Views | 1404 |
-| Unique visitors | 456 |
+| Clones | 380 |
+| Unique cloners | 220 |
+| Views | 1647 |
+| Unique visitors | 533 |
 | Stars | 49 |
 | Forks | 7 |
 
