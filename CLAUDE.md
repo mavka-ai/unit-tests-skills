@@ -86,4 +86,5 @@ file is the single source of truth; do not duplicate its detail here.
 - Place language-specific rules in `rules/tests/{language}/unit/`
 - **Keep general rules in sync**: General rules exist in TWO locations (`generate-test-cases/rules/general/` and `generate-tests/rules/tests/general/`). When adding or updating a general rule, copy the change to both directories
 - When adding a new rule, also add it to the Rules Reference list in the relevant `SKILL.md` file(s)
+- **After any change under a skill's `rules/`, run `./scripts/validate-rules.sh`.** It enforces the two points above — a reference with no file, a file with no reference, and general rules that have drifted apart. CI runs it on every PR. See [AGENTS.md](AGENTS.md#rule-validation) for what each check catches; that file is the single source of truth, do not duplicate its detail here
 - All changes require a PR with CODEOWNER approval; direct pushes to `main` are disabled

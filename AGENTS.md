@@ -54,6 +54,44 @@ validation is entirely local.
 - Keep `skills/` at the repository root. Only `plugin.json` and
   `marketplace.json` belong inside `.claude-plugin/`.
 
+## Rule Validation
+
+A skill is only as good as the rules it actually loads, and every way that can
+break is silent at runtime: the agent reads `SKILL.md`, follows a reference to a
+rule that is not there, and generates tests without it. Nothing errors — the
+output just gets worse.
+
+**After adding, renaming, moving, or deleting anything under a skill's `rules/`,
+run:**
+
+```bash
+./scripts/validate-rules.sh
+```
+
+CI runs the same script in its own workflow
+(`.github/workflows/validate-rules.yml`), on **every** pull request rather than
+only ones touching `skills/`. Two reasons it is separate from plugin
+validation: it needs no Node and no CLI, so a broken upstream release cannot
+take it down; and it carries no path filter, so it always reports and is safe
+to require before merge. A required check that gets skipped never reports, and
+a pull request waiting on a check that will never arrive cannot merge.
+
+### What it checks, and why each check exists
+
+| Check | What it catches |
+|---|---|
+| Referenced rule files exist | A reference in `SKILL.md` (or `RULES-INDEX.md`) naming a file that is not on disk. References come in three valid shapes — `./rules/general/x.md` from the skill root, `general/x.md` from `rules/tests/`, and a bare `x.md` in prose — so a reference passes if any shape resolves. |
+| Every rule file is referenced | The reverse direction. A rule added to the tree but never named in `SKILL.md` is dead weight: nothing instructs the agent to read it. |
+| General rules are in sync | Each skill carries its own copy of the general rules, because a skill is installed standalone and has to be self-contained. Two copies can drift, and a drifted copy means the same request gets different rules depending on which skill the agent picked. |
+| Rule files sit in a known category | This distribution ships unit-test rules only. The check lists the categories that belong here (`general/`, `java/unit/`, `post-generation/`) rather than the ones that do not, so it also catches a category nobody has invented yet. |
+
+### Conventions that follow from this
+
+- A new rule takes two edits, not one: the file itself **and** an entry in the
+  relevant `SKILL.md`. The second check fails without it.
+- Edit general rules in both locations in the same commit. Fixing one copy and
+  leaving the other for later fails the third check.
+
 ## Creating a New Skill
 
 ### Directory Structure
@@ -108,6 +146,9 @@ skills/{skill-name}/rules/
   {language}/unit/
     {rule-name}.md
 ```
+
+Then list it in that skill's `SKILL.md` and run `./scripts/validate-rules.sh`.
+See [Rule Validation](#rule-validation) for what the checks enforce.
 
 ### Rule File Format
 
