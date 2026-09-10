@@ -20,8 +20,14 @@ trap 'rm -f "${FAILURES}"' EXIT
 
 fail() { printf '%s\n' "$*" >>"${FAILURES}"; }
 
-# Documents that point an agent at a rule file.
-docs_for() { ls "$1/SKILL.md" "$1/rules/RULES-INDEX.md" 2>/dev/null; }
+# Documents that point an agent at a rule file. Prints only the ones that exist,
+# one per line, and always succeeds: `ls` with a missing operand exits non-zero,
+# which made every caller depend on where `set -e` does and does not look.
+docs_for() {
+  [ -f "$1/SKILL.md" ] && printf '%s\n' "$1/SKILL.md"
+  [ -f "$1/rules/RULES-INDEX.md" ] && printf '%s\n' "$1/rules/RULES-INDEX.md"
+  return 0
+}
 
 # --- 1. Every referenced rule file exists ------------------------------------
 # References appear in three shapes across the skills, all of them valid:
@@ -58,7 +64,10 @@ echo "==> Every rule file is referenced"
 for skill in skills/*/; do
   skill="${skill%/}"
   [ -d "${skill}/rules" ] || continue
-  refs="$(cat $(docs_for "${skill}") 2>/dev/null || true)"
+  # Read the docs one at a time. `cat $(docs_for ...)` reached `cat` with no
+  # operands for a skill that has rules/ but neither document, and `cat` with no
+  # operands reads stdin — which hangs the run against a terminal.
+  refs="$(docs_for "${skill}" | while IFS= read -r doc; do cat "${doc}" 2>/dev/null || true; done)"
   while IFS= read -r rule; do
     case "${refs}" in
       *"$(basename "${rule}")"*) ;;
