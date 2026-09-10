@@ -29,12 +29,34 @@ docs_for() {
   return 0
 }
 
+# Documents that are not rules. A SKILL.md may legitimately point at AGENTS.md
+# or README.md, and counting that as a rule reference turns a cross-reference
+# into a build failure.
+NOT_A_RULE='(^|/)(AGENTS|AGENTS-SNIPPET|CLAUDE|README|RULES-INDEX|HELP)\.md$'
+
+# Rule references in a document, one per line, paths kept as written.
+#
+# Both checks below read this, so they cannot disagree on what a reference is.
+# They used to: check 1 looked only at backticked tokens while check 2 matched
+# the raw document text, so a bare prose mention counted as a reference for one
+# and was invisible to the other. Backticks are a typographic choice, not a
+# reference, so neither form is privileged here.
+refs_in() {
+  grep -oE '[A-Za-z0-9._/-]+\.md' "$1" \
+    | sed 's|^\./||' \
+    | grep -vE "${NOT_A_RULE}" \
+    | sort -u \
+    || true
+}
+
 # --- 1. Every referenced rule file exists ------------------------------------
 # References appear in three shapes across the skills, all of them valid:
 #   ./rules/general/x.md   (from the skill root)
 #   general/x.md           (from rules/tests/)
 #   x.md                   (bare, in prose: "see compilation-verification.md")
-# A reference resolves if any shape lands on a real file, so try each.
+# A reference resolves if any shape lands on a real file, so try each. The path
+# is checked as written: flattening it to a basename would let a reference name
+# the wrong directory and still pass.
 echo "==> Referenced rule files exist"
 for skill in skills/*/; do
   skill="${skill%/}"
@@ -53,7 +75,7 @@ for skill in skills/*/; do
         *) [ -n "$(find "${skill}/rules" -name "${rel}" -print -quit 2>/dev/null)" ] && continue ;;
       esac
       fail "✘ ${doc} references a rule that does not exist: ${ref}"
-    done < <(grep -o '`[^`]*\.md`' "${doc}" | tr -d '`' | grep -v '^RULES-INDEX\.md$' | sort -u)
+    done < <(refs_in "${doc}")
   done
 done
 
@@ -64,15 +86,15 @@ echo "==> Every rule file is referenced"
 for skill in skills/*/; do
   skill="${skill%/}"
   [ -d "${skill}/rules" ] || continue
-  # Read the docs one at a time. `cat $(docs_for ...)` reached `cat` with no
-  # operands for a skill that has rules/ but neither document, and `cat` with no
-  # operands reads stdin — which hangs the run against a terminal.
-  refs="$(docs_for "${skill}" | while IFS= read -r doc; do cat "${doc}" 2>/dev/null || true; done)"
+  # Compare on basenames: check 1 owns whether a reference resolves to the right
+  # path, this one only asks whether the file is named at all.
+  refs="$(for doc in $(docs_for "${skill}"); do refs_in "${doc}"; done | sed 's|.*/||' | sort -u)"
   while IFS= read -r rule; do
-    case "${refs}" in
-      *"$(basename "${rule}")"*) ;;
-      *) fail "✘ no SKILL.md or RULES-INDEX.md references ${rule}" ;;
-    esac
+    # Exact whole-line match. A substring test passed any rule whose basename
+    # was contained in another reference — principles.md inside
+    # general-principles.md — which is the silence this check exists to end.
+    printf '%s\n' "${refs}" | grep -qxF "$(basename "${rule}")" \
+      || fail "✘ no SKILL.md or RULES-INDEX.md references ${rule}"
   done < <(find "${skill}/rules" -name '*.md' ! -name 'RULES-INDEX.md' | sort)
 done
 
