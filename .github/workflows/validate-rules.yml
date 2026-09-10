@@ -1,0 +1,27 @@
+name: Validate Rules
+
+# Deliberately unfiltered: this runs on every pull request, not only on ones
+# that touch skills/. A required status check that is skipped never reports,
+# and a pull request waiting on a check that will never arrive cannot merge.
+# The job is a checkout and a bash script — cheap enough to always run.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rules:
+    name: validate rule references
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate rule references
+        run: ./scripts/validate-rules.sh
