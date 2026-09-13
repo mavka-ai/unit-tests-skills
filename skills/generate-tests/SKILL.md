@@ -1,15 +1,26 @@
 ---
 name: generate-tests
 description: "Use when the user asks to generate, create, or write unit tests for code. Analyzes the target code, produces a structured test case list for review, then generates test code. Supports Java (JUnit 5, Mockito, AssertJ)."
-allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
-context: fork
 ---
 
 # Generate Tests Skill
 
 You will analyze code and generate high-quality unit tests for a given target.
 
-**Target to test:** $ARGUMENTS
+**Target to test:** Use the file, class, or method supplied with the skill
+invocation or in the user's request. If the host substitutes `$ARGUMENTS`, use
+that value. If no target is supplied, ask the user to identify it.
+
+## Runtime and Resource Paths
+
+This skill is self-contained: its workflow and all required rules are bundled
+in this directory. No other skill or repository checkout is required.
+Resolve `./rules/` paths relative to the directory containing this `SKILL.md`,
+not the target project's working directory. Resolve source and test paths
+against the target project.
+
+Use your agent's available tools to read and search files, edit tests, and
+run build commands. Tool names differ across agents.
 
 ## Quality Standards
 
@@ -67,17 +78,12 @@ Examples:
 
 ### Step 3: Ask for User Review
 
-After outputting test cases, use the **AskUserQuestion tool** to ask the user:
-```
-Question: "Test cases are ready. Proceed with generating test code?"
-Header: "Next step"
-Options:
-  - Label: "Yes, generate tests" / Description: "Proceed to generate test files from the test cases above"
-  - Label: "No, let me review first" / Description: "Stop here so I can review and adjust the test cases"
-```
+After outputting test cases, ask: "Test cases are ready. Proceed with generating
+test code?" Use a user-question tool if your agent provides one; otherwise ask
+in conversation and wait for the answer.
 
-- If user selects "Yes", proceed to Step 4
-- If user selects "No", STOP and wait for further instructions
+- If the user approves, proceed to Step 4.
+- If the user declines or has not answered, stop and wait for further instructions.
 
 ### Step 4: Generate Test Code
 
@@ -88,7 +94,7 @@ Options:
    - **All Java code** → Always apply `java-test-template.md`, `argument-matching.md`, `json-serialization.md` regardless of code type
 2. If an existing test class was found in Step 1, add new test methods to it (do not create a duplicate file)
 3. Generate tests following all rules and the test cases from Step 2
-4. Create or update the test file using the Write tool
+4. Create or update the test file using the available file-editing tool
 
 ### Step 5: Verify Compilation and Execution
 
@@ -155,32 +161,33 @@ Result: Complete test file delivered with 7 passing tests.
 
 **CRITICAL: You MUST read and apply all relevant rules from the `./rules/tests/` directory.**
 
-> **Maintenance note:** General rules in `./rules/tests/general/` are shared with the `generate-test-cases` skill (which has copies in `rules/general/`). When updating rules, keep both locations in sync.
+All references below resolve from this skill directory. General rules are bundled
+locally; read these copies when running the skill.
 
 ### General Rules (Always Apply)
-- `general/test-case-generation-strategy.md` - INCLUDE/EXCLUDE criteria
-- `general/naming-conventions.md` - Test naming format
-- `general/general-principles.md` - Core testing principles (Given-When-Then, actual/expected)
-- `general/technology-stack-detection.md` - Detect language and framework
-- `general/what-makes-good-test.md` - Clarity, Completeness, Conciseness, Resilience
-- `general/cleanly-create-test-data.md` - Use helpers and builders for test data
-- `general/keep-cause-effect-clear.md` - Effects follow causes immediately
-- `general/no-logic-in-tests.md` - KISS > DRY, avoid logic in assertions
-- `general/keep-tests-focused.md` - One scenario per test
-- `general/test-behaviors-not-methods.md` - Separate tests for behaviors
-- `general/verify-relevant-arguments-only.md` - Only verify relevant mock arguments
-- `general/prefer-public-apis.md` - Test public APIs over private methods
-- `general/existing-test-awareness.md` - Check for existing tests, match project conventions
-- `general/code-context-analysis.md` - Read dependencies before writing tests
+- `./rules/tests/general/test-case-generation-strategy.md` - INCLUDE/EXCLUDE criteria
+- `./rules/tests/general/naming-conventions.md` - Test naming format
+- `./rules/tests/general/general-principles.md` - Core testing principles (Given-When-Then, actual/expected)
+- `./rules/tests/general/technology-stack-detection.md` - Detect language and framework
+- `./rules/tests/general/what-makes-good-test.md` - Clarity, Completeness, Conciseness, Resilience
+- `./rules/tests/general/cleanly-create-test-data.md` - Use helpers and builders for test data
+- `./rules/tests/general/keep-cause-effect-clear.md` - Effects follow causes immediately
+- `./rules/tests/general/no-logic-in-tests.md` - KISS > DRY, avoid logic in assertions
+- `./rules/tests/general/keep-tests-focused.md` - One scenario per test
+- `./rules/tests/general/test-behaviors-not-methods.md` - Separate tests for behaviors
+- `./rules/tests/general/verify-relevant-arguments-only.md` - Only verify relevant mock arguments
+- `./rules/tests/general/prefer-public-apis.md` - Test public APIs over private methods
+- `./rules/tests/general/existing-test-awareness.md` - Check for existing tests, match project conventions
+- `./rules/tests/general/code-context-analysis.md` - Read dependencies before writing tests
 
 ### Java Unit Tests
-- `java/unit/java-test-template.md` - Basic template, FORBIDDEN annotations
-- `java/unit/json-serialization.md` - Use explicit JSON literals
-- `java/unit/argument-matching.md` - Use ArgumentCaptor, not any()
-- `java/unit/logging-rules.md` - OutputCaptureExtension for logs
-- `java/unit/domain-service-rules.md` - Mockito patterns for services
-- `java/unit/controller-test-rules.md` - @WebMvcTest and MockMvc patterns for controllers
+- `./rules/tests/java/unit/java-test-template.md` - Basic template, FORBIDDEN annotations
+- `./rules/tests/java/unit/json-serialization.md` - Use explicit JSON literals
+- `./rules/tests/java/unit/argument-matching.md` - Use ArgumentCaptor, not any()
+- `./rules/tests/java/unit/logging-rules.md` - OutputCaptureExtension for logs
+- `./rules/tests/java/unit/domain-service-rules.md` - Mockito patterns for services
+- `./rules/tests/java/unit/controller-test-rules.md` - @WebMvcTest and MockMvc patterns for controllers
 
 ### Post-Generation
-- `post-generation/compilation-verification.md` - Verify compilation
-- `post-generation/test-execution-verification.md` - Verify tests pass
+- `./rules/tests/post-generation/compilation-verification.md` - Verify compilation
+- `./rules/tests/post-generation/test-execution-verification.md` - Verify tests pass

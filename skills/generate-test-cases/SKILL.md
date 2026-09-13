@@ -1,15 +1,27 @@
 ---
 name: generate-test-cases
 description: "Use when the user asks to analyze code for test coverage, list what test cases are needed, or review testing strategy — WITHOUT generating actual test code."
-allowed-tools: Read, Glob, Grep
-context: fork
 ---
 
 # Generate Test Cases Skill
 
 You will analyze code and generate a list of test cases that should be written for a given method/class. This skill outputs test case descriptions only — it does NOT generate actual test code.
 
-**Target to analyze:** $ARGUMENTS
+**Target to analyze:** Use the file, class, or method supplied with the skill
+invocation or in the user's request. If the host substitutes `$ARGUMENTS`, use
+that value. If no target is supplied, ask the user to identify it.
+
+## Runtime and Resource Paths
+
+This skill is self-contained: its workflow and all required rules are bundled
+in this directory. No other skill or repository checkout is required.
+Resolve `./rules/` paths relative to the directory containing this `SKILL.md`,
+not the target project's working directory. Resolve source and test paths
+against the target project.
+
+Use your agent's available tools to read and search files.
+This workflow is read-only: output the analysis in conversation without creating
+or modifying files.
 
 ## Quality Standards
 
@@ -115,7 +127,8 @@ Step 2: Agent outputs:
 
 **CRITICAL: You MUST read and apply all rules from the following files before generating test cases:**
 
-> **Maintenance note:** General rules in `./rules/general/` are shared with the `generate-tests` skill (which has copies in `rules/tests/general/`). When updating rules, keep both locations in sync.
+All references below resolve from this skill directory. General rules are bundled
+locally; read these copies when running the skill.
 
 ### General Rules (Always Apply)
 - `./rules/general/test-case-generation-strategy.md` - INCLUDE/EXCLUDE criteria for test cases

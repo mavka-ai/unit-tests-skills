@@ -1,0 +1,36 @@
+name: Test Skill Installation
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**'
+      - '.claude-plugin/**'
+      - 'README.md'
+      - 'templates/**'
+      - 'scripts/test-installation.mjs'
+      - '.github/workflows/test-installation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - '.claude-plugin/**'
+      - 'README.md'
+      - 'templates/**'
+      - 'scripts/test-installation.mjs'
+      - '.github/workflows/test-installation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installation:
+    name: standalone and multi-agent installation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      # Exercise the CLI users get from the README's unversioned npx command.
+      - run: node --test scripts/test-installation.mjs

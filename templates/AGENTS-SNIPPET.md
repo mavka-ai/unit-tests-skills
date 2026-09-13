@@ -1,59 +1,32 @@
-# AGENTS.md Snippet for Unit Test Skills
+# Optional AGENTS.md Snippet for Unit Test Skills
 
-Add this snippet to your project's `AGENTS.md` file to enable AI agents to automatically discover and use the unit test generation skills.
+Agents with native skill discovery can read the installed skills directly.
+Use these entries if you want explicit routing in your project's `AGENTS.md`.
+Copy **only the entries for skills you installed** into your existing file.
 
-## Quick Setup
+The paths below assume a project install. For a global install, replace
+`.agents/skills/` with the actual absolute path to `~/.agents/skills/`.
+For Claude Code plugin installs, use the plugin's namespaced skill commands
+instead of these filesystem paths.
 
-If you don't have an `AGENTS.md` file yet, create one in your project root:
-
-```bash
-touch AGENTS.md
-```
-
-Then copy the content below into your `AGENTS.md`:
-
----
-
-## Snippet to Copy
+## Generate Tests
 
 ```markdown
-# AGENTS.md
+## Unit test generation
 
-## Unit Test Generation
-
-This project uses unit test generation skills.
-
-### Available Skills
-
-<available_skills>
-  <skill>
-    <name>generate-tests</name>
-    <description>Use when the user asks to generate, create, or write unit tests for code. Analyzes the target code, produces a structured test case list for review, then generates test code. Supports Java (JUnit 5, Mockito, AssertJ).</description>
-  </skill>
-  <skill>
-    <name>generate-test-cases</name>
-    <description>Use when the user asks to analyze code for test coverage, list what test cases are needed, or review testing strategy — WITHOUT generating actual test code.</description>
-  </skill>
-</available_skills>
-
-### Key Principles
-
-- INCLUDE: Each code branch, unique return value, each exception type
-- EXCLUDE: Duplicate scenarios, collection size variations, speculative cases
-- Format: `{method}_{state}_{outcome}` naming
-- Structure: Given-When-Then with `actual`/`expected` prefixes
+When asked to generate or write unit tests, read
+`.agents/skills/generate-tests/SKILL.md` and follow its workflow. Resolve its
+rule paths from that skill directory. It includes analysis, test-case review,
+test generation, and verification; no other skill is required.
 ```
 
----
+## Generate Test Cases
 
-## Why AGENTS.md?
+```markdown
+## Test coverage analysis
 
-According to [Vercel's research](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals):
-
-| Configuration | Success Rate |
-|---------------|--------------|
-| Skills alone | 53% |
-| Skills + instructions | 79% |
-| **AGENTS.md** | **100%** |
-
-AGENTS.md provides persistent context to agents on every turn, without requiring them to decide to load skills first.
+When asked to list test cases or analyze test coverage without writing code,
+read `.agents/skills/generate-test-cases/SKILL.md` and follow its workflow.
+Resolve its rule paths from that skill directory. Output the cases in
+conversation without creating or modifying files; no other skill is required.
+```

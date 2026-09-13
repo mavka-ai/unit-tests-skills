@@ -20,61 +20,115 @@
 
 **unit-tests-skills** is a collection of AI agent skills for generating high-quality unit tests. These skills encode battle-tested testing principles that work across any programming language.
 
-### Option 1: Claude Code plugin (Recommended for Claude Code)
+### Recommended: select skills and agents with `npx skills`
 
-```
-/plugin marketplace add mavka-ai/unit-tests-skills
-/plugin install unit-tests-skills@mavka
-```
-
-Skills are namespaced by the plugin, so they are invoked as
-`/unit-tests-skills:generate-tests` and `/unit-tests-skills:generate-test-cases`.
-Update later with `/plugin marketplace update mavka`.
-
-### Option 2: Using openskills (Recommended for other agents)
-
-[openskills](https://github.com/numman-ali/openskills) automatically generates `AGENTS.md` for maximum AI agent effectiveness.
-
-```bash
-# Install skills
-npx openskills install mavka-ai/unit-tests-skills
-
-# Auto-generate/update AGENTS.md with installed skills
-npx openskills sync
-```
-
-**Why openskills?** According to [Vercel's research](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals), skills alone trigger only 53% of the time. With `AGENTS.md`, success rate jumps to **100%**.
-
-### Option 3: Using npx skills
+Run this **in the project where you want to use the skills**, from your own
+terminal (Node.js 22.20+ and Git required):
 
 ```bash
 npx skills add mavka-ai/unit-tests-skills
 ```
 
-Or install specific skills:
+In the interactive installer:
+
+1. Select the skills you need. **Space toggles a checkbox; Enter confirms the
+   checked items. Moving the cursor does not select a skill.**
+2. Select your agents. Keep **Universal (`.agents/skills`)** selected; add
+   **Claude Code** if you use it. Codex and other agents that read
+   `.agents/skills` share that directory.
+3. Choose **Project** or **Global** scope.
+4. Choose **Symlink** when offered, then check the paths and selected skills in
+   the installation summary before confirming.
+
+Agent auto-detection can skip the agent picker. To control exactly what gets
+installed, pass the skill and agents explicitly:
 
 ```bash
-npx skills add mavka-ai/unit-tests-skills --skill generate-test-cases
-npx skills add mavka-ai/unit-tests-skills --skill generate-tests
+# One skill, shared by Codex and Claude Code; scope is still prompted
+npx skills add mavka-ai/unit-tests-skills --skill generate-tests --agent codex claude-code
+
+# Analysis only, shared by Codex and Claude Code
+npx skills add mavka-ai/unit-tests-skills --skill generate-test-cases --agent codex claude-code
+
+# Claude Code with a neutral canonical directory (keep universal here)
+npx skills add mavka-ai/unit-tests-skills --skill generate-tests --agent universal claude-code
+
+# Codex only
+npx skills add mavka-ai/unit-tests-skills --skill generate-tests --agent codex
 ```
 
-For Claude Code specifically:
+Use `--list` to inspect the available skills without installing them. Other agent
+IDs and options are listed in the [skills CLI documentation](https://github.com/vercel-labs/skills).
+
+For a repeatable install without prompts, specify both the skill and agents:
 
 ```bash
-npx skills add mavka-ai/unit-tests-skills -a claude-code
+# Project scope: canonical files under ./.agents/skills
+npx skills add mavka-ai/unit-tests-skills --skill generate-tests --agent universal claude-code --yes
+
+# Global scope: canonical files under ~/.agents/skills
+npx skills add mavka-ai/unit-tests-skills --skill generate-tests --agent universal claude-code --global --yes
 ```
 
-**Important:** After installing with `npx skills`, manually add the snippet from [`templates/AGENTS-SNIPPET.md`](templates/AGENTS-SNIPPET.md) to your project's `AGENTS.md` file.
+`--yes` skips all prompts; without `--skill` it installs all discovered skills.
+When an AI agent runs the CLI, it may also switch to noninteractive mode, so give
+it the explicit skill, agents, and scope you want.
 
-## Why AGENTS.md Matters
+With `universal` (or `codex`) plus `claude-code` and **Symlink**, the layout is:
 
-| Configuration | Success Rate |
-|---------------|--------------|
-| Skills alone | 53% |
-| Skills + prompting | 79% |
-| **AGENTS.md** | **100%** |
+```text
+.agents/skills/generate-tests/          # canonical files, including all rules
+.claude/skills/generate-tests          # symlink → ../../.agents/skills/generate-tests
+```
 
-`AGENTS.md` provides persistent context to AI agents on every turn, without requiring them to decide to load skills first. See the [full article](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) for details.
+The same layout lives under your home directory for global installs. Selecting
+only `claude-code` makes the CLI copy directly to `.claude/skills`; include
+`universal` to keep the canonical files neutral. Avoid `--copy` for the shared
+layout. Agents that read `.agents/skills` can discover its contents even when
+not explicitly selected; agent selection is not an access restriction.
+
+Each skill is independently installable. `generate-tests` includes its own
+analysis workflow and rules; it does not invoke or require
+`generate-test-cases`. The analysis skill likewise needs no generation skill.
+
+### Claude Code plugin: install the whole collection
+
+Use this option if you want **both skills as a Claude Code plugin**. It uses
+Claude Code's plugin storage, rather than the `.agents/skills` layout above.
+
+```text
+/plugin marketplace add mavka-ai/unit-tests-skills
+/plugin install unit-tests-skills@mavka
+```
+
+Plugin commands are `/unit-tests-skills:generate-tests` and
+`/unit-tests-skills:generate-test-cases`. Update with
+`/plugin marketplace update mavka`. For individual skills, use `npx skills`.
+Choose one installation method to avoid duplicate skill discovery.
+
+### Moving from openskills
+
+`openskills` controls its own selection UI and installation paths. Its default
+install writes to `.claude/skills`; it does not provide the agent/scope/symlink
+workflow described above. Use `npx skills` for new installs.
+
+If you already installed these skills with openskills:
+
+1. Review and back up any local changes in the existing skill directories.
+2. Remove only the copies you are replacing: `npx openskills remove generate-tests`
+   and/or `npx openskills remove generate-test-cases`. Confirm the displayed path
+   matches the project or global copy you intended to remove.
+3. If you used `openskills sync`, remove the corresponding stale entries from
+   `AGENTS.md` or rerun `npx openskills sync` and inspect its changes.
+4. Reinstall the desired skills with the commands above. For Claude Code, check
+   that `.claude/skills/<skill>` is a symlink to `.agents/skills/<skill>`.
+
+### Optional project instructions
+
+Agents with native skill discovery can use the installed `SKILL.md` files
+directly. To explicitly route unit-test requests, copy only the relevant entries
+from [`templates/AGENTS-SNIPPET.md`](templates/AGENTS-SNIPPET.md) into your project's
+`AGENTS.md`. The snippet is optional and must match the skills actually installed.
 
 ## Available Skills
 
@@ -85,8 +139,9 @@ npx skills add mavka-ai/unit-tests-skills -a claude-code
 
 Claude Code namespaces plugin skills by plugin name, so the command depends on
 how you installed. Use the **Plugin command** after
-[Option 1](#option-1-claude-code-plugin-recommended-for-claude-code); use the
-plain **Command** after openskills or `npx skills`.
+[the plugin installation](#claude-code-plugin-install-the-whole-collection); use the
+plain **Command** with agents that support slash commands after `npx skills`.
+Otherwise, name the skill and target file in your request.
 
 ## Usage
 
@@ -230,6 +285,21 @@ When adding new rules:
 2. Place language-specific rules in `skills/generate-tests/rules/tests/{language}/unit/`
 3. Update skill files if new rules need explicit reference
 4. Ensure your changes follow the existing format and style
+
+### Validate installation
+
+```bash
+./scripts/validate-plugin.sh
+./scripts/validate-rules.sh
+node --test scripts/test-installation.mjs
+```
+
+The installation smoke tests need Node.js 22.20+, Git, and npm/network access.
+They install each skill separately from the collection and from an isolated
+skill directory into temporary projects, checking bundled rules, skill selection,
+Codex discovery paths, and Claude symlinks. No global skills are installed.
+To use an already installed CLI offline, set `SKILLS_CLI` to its absolute
+`bin/cli.mjs` path. CI runs these tests with the current `skills` CLI.
 
 ## Repository Protection
 

@@ -91,7 +91,7 @@ package com.example.service; // Must match src/test/java/com/example/service/
 
 ```bash
 # 1. Create test file
-# (using Write tool)
+# (using the available file-editing tool)
 
 # 2. Run compilation
 mvn test-compile -q
