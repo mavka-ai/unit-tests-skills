@@ -62,7 +62,67 @@ npx openskills sync
 
 Skills are namespaced by the plugin, so they are invoked as
 `/unit-tests-skills:generate-tests` and `/unit-tests-skills:generate-test-cases`.
-Update later with `/plugin marketplace update mavka`.
+See [Updating and Uninstalling](#updating-and-uninstalling) to keep the
+installed plugin current or remove it.
+
+## Updating and Uninstalling
+
+Use the commands for the installation method you originally chose.
+
+### npx skills
+
+Update both skills to their latest versions:
+
+```bash
+npx skills update generate-test-cases generate-tests
+```
+
+Remove both skills:
+
+```bash
+npx skills remove generate-test-cases generate-tests
+```
+
+Because the `AGENTS.md` snippet for this installation method is added manually,
+remove that snippet manually after uninstalling the skills.
+
+### openskills
+
+Update installed skills from their recorded sources, then regenerate
+`AGENTS.md`:
+
+```bash
+npx openskills update
+npx openskills sync
+```
+
+Remove both skills, then regenerate `AGENTS.md` so it no longer references
+them:
+
+```bash
+npx openskills remove generate-test-cases
+npx openskills remove generate-tests
+npx openskills sync
+```
+
+### Claude Code plugin
+
+Refresh the marketplace listing, then update the installed plugin:
+
+```text
+/plugin marketplace update mavka
+/plugin update unit-tests-skills@mavka
+```
+
+Remove the installed plugin:
+
+```text
+/plugin uninstall unit-tests-skills@mavka
+```
+
+If you no longer use anything from the `mavka` marketplace, you can also remove
+the marketplace itself with `/plugin marketplace remove mavka`. Removing a
+marketplace also uninstalls plugins installed from it.
 
 ## Why AGENTS.md Matters
 
