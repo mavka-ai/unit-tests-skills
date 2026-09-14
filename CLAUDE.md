@@ -40,7 +40,7 @@ templates/
 
 The run is unattended end to end: the test case list is printed, then the code follows.
 The list lets the user audit the plan against the result afterwards. See
-[AGENTS.md](AGENTS.md#unattended-runs) for why.
+[AGENTS.md](AGENTS.md#unattended-runs).
 
 `/generate-test-cases` is available separately for analysis-only use cases (e.g., reviewing test coverage strategy without generating code).
 

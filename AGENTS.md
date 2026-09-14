@@ -16,22 +16,12 @@ Skills for generating unit tests with consistent quality. Each skill is self-con
 ## Unattended Runs
 
 Skills in this repository run end to end on their own: a skill takes its target, works
-through every step, and reports. Anything a human checkpoint would have surfaced gets
-printed as it happens, so the run stays auditable afterwards.
+through every step, and reports. Where a human checkpoint would have gone, the skill
+prints the information and keeps going — `generate-tests` prints its test case list
+before writing any code, so the plan is on record and auditable against the result.
 
-The reason is structural: in Claude Code an interactive prompt would not reach the user
-at all. Both skills declare `context: fork`, which runs them through the subagent path. That path filters the tool
-list through a deny-set that contains `AskUserQuestion` unconditionally — before any
-check of whether the agent is built-in or asynchronous. The `allowed-tools:` line in the
-frontmatter does not override it and does not warn: the tool is simply absent at runtime.
-Verified against the Claude Code 2.1.7 bundle. A review gate written this way is dead
-code — it never fires, and the reviewer never learns that it did not.
-
-The consequence for skill design: where a human checkpoint would have gone, print the
-information instead and keep going. `generate-tests` prints its test case list before
-writing any code, so the plan is on record and auditable against the result — but it
-does not wait for approval. A user who wants the checkpoint runs `/generate-test-cases`
-first, reads the list, and then runs `/generate-tests`.
+A user who wants the checkpoint runs `/generate-test-cases` first, reads the list, and
+then runs `/generate-tests`.
 
 ## Rules Location
 
