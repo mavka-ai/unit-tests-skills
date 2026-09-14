@@ -147,6 +147,17 @@ Steps:
 3. ...
 ```
 
+### Tools a Skill May Declare
+
+Keep `allowed-tools` to tools every agent runtime provides. `AskUserQuestion` is
+Claude Code's own — Codex and the other agents this distribution targets
+(`README.md`, "Recommended for other agents") have no equivalent, so a skill that
+stops to ask the user works in one runtime and silently does nothing in the rest.
+
+Skills here run end to end and print what they decided instead. Do not add a tool
+that pauses for input, and do not set `context: fork` — a forked skill's output does
+not reach the user, which is the whole point of printing the plan.
+
 ## Adding a New Rule
 
 Add rules inside the skill folder that uses them:
