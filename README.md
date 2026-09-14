@@ -20,32 +20,7 @@
 
 **unit-tests-skills** is a collection of AI agent skills for generating high-quality unit tests. These skills encode battle-tested testing principles that work across any programming language.
 
-### Option 1: Claude Code plugin (Recommended for Claude Code)
-
-```
-/plugin marketplace add mavka-ai/unit-tests-skills
-/plugin install unit-tests-skills@mavka
-```
-
-Skills are namespaced by the plugin, so they are invoked as
-`/unit-tests-skills:generate-tests` and `/unit-tests-skills:generate-test-cases`.
-Update later with `/plugin marketplace update mavka`.
-
-### Option 2: Using openskills (Recommended for other agents)
-
-[openskills](https://github.com/numman-ali/openskills) automatically generates `AGENTS.md` for maximum AI agent effectiveness.
-
-```bash
-# Install skills
-npx openskills install mavka-ai/unit-tests-skills
-
-# Auto-generate/update AGENTS.md with installed skills
-npx openskills sync
-```
-
-**Why openskills?** According to [Vercel's research](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals), skills alone trigger only 53% of the time. With `AGENTS.md`, success rate jumps to **100%**.
-
-### Option 3: Using npx skills
+### Option 1: Using npx skills (Recommended)
 
 ```bash
 npx skills add mavka-ai/unit-tests-skills
@@ -66,6 +41,31 @@ npx skills add mavka-ai/unit-tests-skills -a claude-code
 
 **Important:** After installing with `npx skills`, manually add the snippet from [`templates/AGENTS-SNIPPET.md`](templates/AGENTS-SNIPPET.md) to your project's `AGENTS.md` file.
 
+### Option 2: Using openskills (Recommended for other agents)
+
+[openskills](https://github.com/numman-ali/openskills) automatically generates `AGENTS.md` for maximum AI agent effectiveness.
+
+```bash
+# Install skills
+npx openskills install mavka-ai/unit-tests-skills
+
+# Auto-generate/update AGENTS.md with installed skills
+npx openskills sync
+```
+
+**Why openskills?** According to [Vercel's research](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals), skills alone trigger only 53% of the time. With `AGENTS.md`, success rate jumps to **100%**.
+
+### Option 3: Claude Code plugin (Recommended for Claude Code)
+
+```
+/plugin marketplace add mavka-ai/unit-tests-skills
+/plugin install unit-tests-skills@mavka
+```
+
+Skills are namespaced by the plugin, so they are invoked as
+`/unit-tests-skills:generate-tests` and `/unit-tests-skills:generate-test-cases`.
+Update later with `/plugin marketplace update mavka`.
+
 ## Why AGENTS.md Matters
 
 | Configuration | Success Rate |
@@ -85,7 +85,7 @@ npx skills add mavka-ai/unit-tests-skills -a claude-code
 
 Claude Code namespaces plugin skills by plugin name, so the command depends on
 how you installed. Use the **Plugin command** after
-[Option 1](#option-1-claude-code-plugin-recommended-for-claude-code); use the
+[Option 3](#option-3-claude-code-plugin-recommended-for-claude-code); use the
 plain **Command** after openskills or `npx skills`.
 
 ## Usage
@@ -311,4 +311,3 @@ using them in your own product or fork's name is not. See
 
 ## Guide to Building Skills for Claude
 [The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
-
