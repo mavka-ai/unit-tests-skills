@@ -39,12 +39,6 @@ npx skills add mavka-ai/unit-tests-skills --skill generate-test-cases
 npx skills add mavka-ai/unit-tests-skills --skill generate-tests
 ```
 
-For Claude Code specifically:
-
-```bash
-npx skills add mavka-ai/unit-tests-skills -a claude-code
-```
-
 ### Option 2: Using openskills (Recommended for other agents)
 
 [openskills](https://github.com/numman-ali/openskills) automatically generates `AGENTS.md` for maximum AI agent effectiveness.
