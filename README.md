@@ -22,9 +22,15 @@
 
 ### Option 1: Using npx skills (Recommended)
 
+For reliable automatic skill discovery, complete both steps:
+
+1. Install the skills:
+
 ```bash
 npx skills add mavka-ai/unit-tests-skills
 ```
+
+2. Add the [`AGENTS.md` snippet](templates/AGENTS-SNIPPET.md) to your project's `AGENTS.md` file so AI agents know when and how to use the installed skills.
 
 Or install specific skills:
 
@@ -38,8 +44,6 @@ For Claude Code specifically:
 ```bash
 npx skills add mavka-ai/unit-tests-skills -a claude-code
 ```
-
-**Important:** After installing with `npx skills`, manually add the snippet from [`templates/AGENTS-SNIPPET.md`](templates/AGENTS-SNIPPET.md) to your project's `AGENTS.md` file.
 
 ### Option 2: Using openskills (Recommended for other agents)
 
