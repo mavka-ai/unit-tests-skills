@@ -19,15 +19,7 @@ Skills in this repository never ask the user a question mid-run. No `AskUserQues
 no "reply yes to continue", no waiting on input of any kind. A skill takes its target,
 runs to completion, and reports.
 
-Two reasons, and the second is the one that actually forces it:
-
-**1. Portability.** These skills ship to Claude Code, to `openskills`, to `npx skills`,
-and through `AGENTS.md` to whatever agent the user runs. Interactive prompting is not a
-portable capability — most runtimes have no channel for it, and autonomous or headless
-runs (CI, batch jobs, background agents) have no human on the other end at all. A skill
-that blocks on an answer is a skill that hangs there.
-
-**2. In Claude Code it does not even reach the user.** Both skills declare
+In Claude Code such a prompt does not even reach the user. Both skills declare
 `context: fork`, which runs them through the subagent path. That path filters the tool
 list through a deny-set that contains `AskUserQuestion` unconditionally — before any
 check of whether the agent is built-in or asynchronous. The `allowed-tools:` line in the
