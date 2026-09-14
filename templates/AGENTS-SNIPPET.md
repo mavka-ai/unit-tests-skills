@@ -36,6 +36,15 @@ This project uses unit test generation skills.
   </skill>
 </available_skills>
 
+### Recommended Workflow
+
+1. `/generate-test-cases <file>` — lists the cases as Given-When-Then, writes no code
+2. Review the list; say which cases to add, drop or reword
+3. `/generate-tests <file>` — generates the tests from that list and verifies them
+
+Run `/generate-tests` on its own when the review step is not needed — it prints the
+same list before writing code, then continues.
+
 ### Key Principles
 
 - INCLUDE: Each code branch, unique return value, each exception type

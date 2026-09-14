@@ -32,17 +32,20 @@ templates/
 
 ## Workflow
 
-`/generate-tests` is the primary skill — it handles the complete workflow internally:
+The recommended sequence is `/generate-test-cases` → review the list → `/generate-tests`,
+which puts the plan in front of the user before any code is written. See
+[AGENTS.md](AGENTS.md#recommended-workflow).
+
+`/generate-tests` on its own handles the complete workflow internally:
 
 1. Analyzes code and outputs a structured test case list
 2. Generates test code
 3. Verifies the tests compile and pass
 
-The run is unattended end to end: the test case list is printed, then the code follows.
-The list lets the user audit the plan against the result afterwards. See
-[AGENTS.md](AGENTS.md#unattended-runs).
+The run is unattended end to end: the test case list is printed, then the code follows,
+so the list stays auditable against the result.
 
-`/generate-test-cases` is available separately for analysis-only use cases (e.g., reviewing test coverage strategy without generating code).
+`/generate-test-cases` is also useful on its own for analysis-only work (e.g., reviewing test coverage strategy without generating code).
 
 ## Rules
 

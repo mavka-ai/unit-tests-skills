@@ -13,15 +13,17 @@ Skills for generating unit tests with consistent quality. Each skill is self-con
 | `/generate-tests <file>`      | Full workflow, unattended: analyzes code, prints test case list, generates test code, verifies it |
 | `/generate-test-cases <file>` | Analysis only: outputs test case list without generating code |
 
-## Unattended Runs
+## Recommended Workflow
 
-Skills in this repository run end to end on their own: a skill takes its target, works
-through every step, and reports. Where a human checkpoint would have gone, the skill
-prints the information and keeps going — `generate-tests` prints its test case list
-before writing any code, so the plan is on record and auditable against the result.
+Run the two skills in sequence when the plan is worth reviewing before any code exists:
 
-A user who wants the checkpoint runs `/generate-test-cases` first, reads the list, and
-then runs `/generate-tests`.
+1. `/generate-test-cases <file>` — lists the cases as Given-When-Then, writes no code
+2. Read the list; say which cases to add, drop or reword
+3. `/generate-tests <file>` — generates the tests from that list and verifies them
+
+`/generate-tests` on its own covers the same ground in one pass: it prints the test case
+list before writing any code, then keeps going. Each skill runs end to end without
+stopping for input, so that printed list is the record of what it decided to do.
 
 ## Rules Location
 

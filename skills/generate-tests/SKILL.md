@@ -40,8 +40,12 @@ You will analyze code and generate high-quality unit tests for a given target.
    - Private/protected methods called by the target
    - Security annotations (if present)
 2. Apply the INCLUDE/EXCLUDE rules strictly
-3. Output the list of test cases in the format below before writing any test code
-4. Continue straight to Step 3. The list is printed so the user can audit the plan
+3. If a test case list for this target is already present — the user ran
+   `/generate-test-cases` first and reviewed it — treat that list as the approved plan
+   and generate from it. Where your analysis differs, say which cases you added or
+   dropped and why, so the user sees the plan they reviewed change.
+4. Output the list of test cases in the format below before writing any test code
+5. Continue straight to Step 3. The list is printed so the user can audit the plan
    against the generated tests afterwards; the run stays unattended end to end.
 
 #### Test Case Output Format
