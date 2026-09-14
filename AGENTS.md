@@ -13,14 +13,14 @@ Skills for generating unit tests with consistent quality. Each skill is self-con
 | `/generate-tests <file>`      | Full workflow, unattended: analyzes code, prints test case list, generates test code, verifies it |
 | `/generate-test-cases <file>` | Analysis only: outputs test case list without generating code |
 
-## No Interactive Prompts
+## Unattended Runs
 
-Skills in this repository never ask the user a question mid-run. No `AskUserQuestion`,
-no "reply yes to continue", no waiting on input of any kind. A skill takes its target,
-runs to completion, and reports.
+Skills in this repository run end to end on their own: a skill takes its target, works
+through every step, and reports. Anything a human checkpoint would have surfaced gets
+printed as it happens, so the run stays auditable afterwards.
 
-In Claude Code such a prompt does not even reach the user. Both skills declare
-`context: fork`, which runs them through the subagent path. That path filters the tool
+The reason is structural: in Claude Code an interactive prompt would not reach the user
+at all. Both skills declare `context: fork`, which runs them through the subagent path. That path filters the tool
 list through a deny-set that contains `AskUserQuestion` unconditionally — before any
 check of whether the agent is built-in or asynchronous. The `allowed-tools:` line in the
 frontmatter does not override it and does not warn: the tool is simply absent at runtime.

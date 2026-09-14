@@ -38,9 +38,9 @@ templates/
 2. Generates test code
 3. Verifies the tests compile and pass
 
-The run is unattended end to end — no approval prompt between the test case list and the
-generated code. The list is printed so the user can audit the plan against the result
-afterwards. See [AGENTS.md](AGENTS.md#no-interactive-prompts) for why.
+The run is unattended end to end: the test case list is printed, then the code follows.
+The list lets the user audit the plan against the result afterwards. See
+[AGENTS.md](AGENTS.md#unattended-runs) for why.
 
 `/generate-test-cases` is available separately for analysis-only use cases (e.g., reviewing test coverage strategy without generating code).
 

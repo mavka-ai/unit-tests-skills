@@ -95,8 +95,9 @@ verify(orderRepository).save(captor.capture());
 assertThat(captor.getValue().getProductId()).isEqualTo("product-1");
 ```
 
-Never put `captor.capture()` inside `when(...)`. A captor in a stub records only
-what that stub matched, and Mockito documents captors as a verification tool.
+Keep `captor.capture()` in `verify(...)` — Mockito documents captors as a
+verification tool. A captor placed in a stub records only the calls that stub
+matched, so the assertion can pass on an empty capture.
 
 ### When `any()` is Acceptable in Verification
 

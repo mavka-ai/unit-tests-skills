@@ -14,10 +14,9 @@ Use `OutputCaptureExtension` to capture and verify log output in tests.
 A log line is usually an implementation detail. Asserting on it couples the test to
 wording that any refactor may change, which is exactly what
 `general-principles.md` ("test behaviour, not implementation") and
-`what-makes-good-test.md` ("Resilience") warn against. Do not add a log assertion
-just because the method happens to log.
+`what-makes-good-test.md` ("Resilience") warn against.
 
-Assert on log output only when the log **is** the observable contract:
+Assert on log output when the log **is** the observable contract:
 
 - the method's entire job is to emit a record (audit trail, security event)
 - there is no other observable effect (a `void` method whose only outcome is the log)

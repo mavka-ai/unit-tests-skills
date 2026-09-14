@@ -142,11 +142,9 @@ mockMvc.perform(get("/api/users/1"))
         .andExpect(jsonPath("$.age").value(30));
 ```
 
-Note that `jsonPath(...)` returns a `ResultMatcher` — it is passed to
-`andExpect(...)`, never wrapped in `assertThat(...)`. Outside MockMvc, assert on
-the parsed object rather than on the raw JSON string; substring matching on JSON
-(`.contains("\"name\":\"John\"")`) only trades field order for whitespace
-sensitivity.
+`jsonPath(...)` returns a `ResultMatcher`, so it belongs inside `andExpect(...)`.
+Outside MockMvc, parse the response and assert on the resulting object — parsing is
+what keeps the assertion independent of field order and whitespace alike.
 
 ### Summary Checklist
 

@@ -25,15 +25,14 @@ After tests compile successfully, run them and verify they pass. Tests that comp
 2. **If any test fails:**
    - Read the failure output carefully
    - Identify the root cause (wrong expected value, incorrect mock setup, missing stubbing, wrong method behavior assumption)
-   - Fix the test — do NOT change the production code
+   - Fix the test, leaving the production code as it is
    - Re-run to verify the fix
    - Repeat (max 3 fix attempts per failing test)
 
 3. **If a test cannot be fixed after 3 attempts:**
-   - Do NOT delete it. A test you could not make pass is the most informative
+   - Keep it in the file. A test you could not make pass is the most informative
      output of the whole run — it is either a bug in the production code or a
-     wrong assumption about it, and deleting it destroys that signal while
-     leaving a green build that looks like success.
+     wrong assumption about it, and that signal is worth more than a green build.
    - Annotate it `@Disabled("<what it asserts, and the failure you could not resolve>")`
      so it stays in the file, stays visible in the test report, and stays runnable
      once the cause is understood

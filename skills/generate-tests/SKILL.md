@@ -41,8 +41,8 @@ You will analyze code and generate high-quality unit tests for a given target.
    - Security annotations (if present)
 2. Apply the INCLUDE/EXCLUDE rules strictly
 3. Output the list of test cases in the format below before writing any test code
-4. Continue straight to Step 3 — do not stop to ask for approval. The list is printed so the
-   user can audit the plan against the generated tests, not to gate the run.
+4. Continue straight to Step 3. The list is printed so the user can audit the plan
+   against the generated tests afterwards; the run stays unattended end to end.
 
 #### Test Case Output Format
 
@@ -82,9 +82,9 @@ Examples:
 
 1. Run compilation and fix any issues (max 5 attempts — see `compilation-verification.md`)
 2. Run the generated test class to verify all tests pass (see `test-execution-verification.md`)
-3. Fix any failing tests — do NOT modify production code
-4. If a test cannot be fixed after 3 attempts, mark it `@Disabled` with the reason and
-   report it — do NOT delete it (see `test-execution-verification.md`)
+3. Fix any failing tests by changing the test — production code stays as it is
+4. If a test resists fixing after 3 attempts, keep it in the file: mark it `@Disabled`
+   with the reason and report it (see `test-execution-verification.md`)
 
 ---
 
