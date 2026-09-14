@@ -15,9 +15,10 @@ Use Mockito for unit testing services and domain logic. Keep tests fast and isol
 - Do NOT start frameworks or containers for unit tests
 - Mock external dependencies, not the system under test
 - Never mock simple value objects
-- Capture arguments in `verify(...)` — Mockito's own documentation recommends
-  captors for verification. A captor placed in a stub records only the calls that
-  stub matched, so a test that never reaches the stub passes with an empty capture
+- Capture arguments in `verify(...)` — Mockito documents captors as a verification
+  tool. A captor in a stub captures only when a call matches that stub, so a test that
+  never reaches it fails late at `captor.getValue()` ("No argument value was
+  captured!") instead of at the call that never happened
 
 **Incorrect:**
 

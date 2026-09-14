@@ -9,22 +9,37 @@ tags: java, tests, logging, output-capture, stdout, stderr
 
 Use `OutputCaptureExtension` to capture and verify log output in tests.
 
-### First: Decide Whether to Test the Log at All
+### Which Logs to Cover
 
-A log line is usually an implementation detail. Asserting on it couples the test to
-wording that any refactor may change, which is exactly what
-`general-principles.md` ("test behaviour, not implementation") and
-`what-makes-good-test.md` ("Resilience") warn against.
+Whether a log line is consumed downstream — by an alert rule, a log parser, a
+dashboard, a compliance report — is decided **outside this repository**, in the
+observability stack. The code does not say so, and neither does anything you can read
+here. So do not try to infer it, and do not assume a log line is noise because it looks
+routine.
 
-Assert on log output when the log **is** the observable contract:
+Decide by log level instead, which the code does state:
 
-- the method's entire job is to emit a record (audit trail, security event)
-- there is no other observable effect (a `void` method whose only outcome is the log)
-- a specific message is required by an operational contract — an alert rule, a log
-  parser, a compliance requirement
+| Level | Cover it | Why |
+|---|---|---|
+| `ERROR`, `WARN` | Yes | This is what on-call and alerting read. Assume something depends on it. |
+| `INFO` | Yes | Emitted deliberately for someone outside the process. Assume the same. |
+| `DEBUG`, `TRACE` | No | Developer scaffolding, switched off in production. Not observable output. |
 
-Otherwise assert on the return value or the mock interaction instead, and let the
-logging change freely.
+Assert on the **stable part** of the message — the identifiers and values interpolated
+into it, not the sentence around them:
+
+```java
+// Resilient: survives any rewording of the message
+assertThat(output.getOut()).contains("order-123");
+
+// Brittle: breaks the moment someone rephrases the log line
+assertThat(output.getOut()).isEqualTo("Processing order: order-123");
+```
+
+That keeps coverage of everything operations might depend on without coupling the test
+to wording, which is what `what-makes-good-test.md` ("Resilience") asks for. Where the
+failure has no identifier to anchor on, asserting the message text is the only option
+available — do it, and keep the asserted fragment short.
 
 ### Rules
 
@@ -63,10 +78,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 @ExtendWith(OutputCaptureExtension.class)
 class OrderServiceTest {
 
     private OrderService orderService = new OrderService();
+    private CacheService cacheService = new CacheService();
 
     @Test
     void processOrder_success_logsOrderId(CapturedOutput output) {
@@ -76,8 +95,8 @@ class OrderServiceTest {
         // When
         orderService.processOrder(order);
 
-        // Then
-        assertThat(output.getOut()).contains("Processing order: order-123");
+        // Then — the production line is INFO; anchor on the id, not the wording
+        assertThat(output.getOut()).contains("order-123");
     }
 
     @Test
@@ -89,7 +108,7 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.processOrder(invalidOrder))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        // Then
+        // Then — ERROR, and this path has no id to anchor on: assert a short fragment
         assertThat(output.getErr()).contains("Invalid order");
     }
 
@@ -102,7 +121,7 @@ class OrderServiceTest {
         cacheService.getData(key); // First call - cache miss
         cacheService.getData(key); // Second call - cache hit
 
-        // Then - verify log message appeared exactly once
+        // Then - the cache miss is logged at INFO, so it is covered; the hit adds nothing
         assertThat(output.getOut()).containsOnlyOnce("Loading from database");
     }
 }
@@ -136,7 +155,10 @@ For non-Spring projects, use alternative approaches:
 
 ### Use Cases
 
-1. **Verifying log messages** - ensure important events are logged
-2. **Cache behavior** - verify cache hits/misses via log output
-3. **Error logging** - verify errors are properly logged
-4. **Debug output** - verify debug information is output correctly
+1. **Error and warning logs** - verify failures are recorded, with the identifiers
+   needed to trace them
+2. **INFO lifecycle events** - verify important events are logged
+3. **Cache behavior** - verify cache hits/misses, when the miss is logged at INFO or above
+
+`DEBUG` and `TRACE` output is out of scope — it is off in production, so no test
+should depend on it.

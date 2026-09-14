@@ -11,8 +11,10 @@ Capture and verify actual arguments instead of using `any()` matchers for DTOs a
 
 ### Rules
 
-- **Do NOT** use `any(...)` for DTO/model objects in stubbing or verify calls
-- Capture the real argument with `ArgumentCaptor` and assert relevant fields
+- In `verify(...)`, capture DTO/model arguments with `ArgumentCaptor` and assert the
+  fields that matter — `any(...)` in that position asserts nothing about the data
+- In `when(...)`, `any(...)` is the right choice: a stub decides what the mock returns,
+  it makes no assertion. See "Stubbing and Verification Are Different Positions" below
 
 **Incorrect:**
 
@@ -96,8 +98,11 @@ assertThat(captor.getValue().getProductId()).isEqualTo("product-1");
 ```
 
 Keep `captor.capture()` in `verify(...)` — Mockito documents captors as a
-verification tool. A captor placed in a stub records only the calls that stub
-matched, so the assertion can pass on an empty capture.
+verification tool. A captor in a stub captures only when a call actually matches that
+stub, so when the code never reaches it the test fails late, at `captor.getValue()`,
+with `MockitoException: No argument value was captured!` — an error that points at the
+assertion rather than at the call that never happened. The same captor in `verify(...)`
+fails at the verification and names the call Mockito expected.
 
 ### When `any()` is Acceptable in Verification
 
