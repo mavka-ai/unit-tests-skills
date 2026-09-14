@@ -28,7 +28,7 @@ This project uses unit test generation skills.
 <available_skills>
   <skill>
     <name>generate-tests</name>
-    <description>Use when the user asks to generate, create, or write unit tests for code. Analyzes the target code, produces a structured test case list for review, then generates test code. Supports Java (JUnit 5, Mockito, AssertJ).</description>
+    <description>Use when the user asks to generate, create, write, or add unit tests for existing code, or to cover a class, method, or file with tests — including Java targets using JUnit 5, Mockito, or AssertJ. Not for analysis-only requests that stop at listing test cases.</description>
   </skill>
   <skill>
     <name>generate-test-cases</name>

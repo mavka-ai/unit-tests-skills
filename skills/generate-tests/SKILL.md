@@ -1,7 +1,7 @@
 ---
 name: generate-tests
-description: "Use when the user asks to generate, create, or write unit tests for code. Analyzes the target code, produces a structured test case list for review, then generates test code. Supports Java (JUnit 5, Mockito, AssertJ)."
-allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
+description: "Use when the user asks to generate, create, write, or add unit tests for existing code, or to cover a class, method, or file with tests — including Java targets using JUnit 5, Mockito, or AssertJ. Not for analysis-only requests that stop at listing test cases."
+allowed-tools: Read, Write, Glob, Grep, Bash
 context: fork
 ---
 
@@ -40,7 +40,9 @@ You will analyze code and generate high-quality unit tests for a given target.
    - Private/protected methods called by the target
    - Security annotations (if present)
 2. Apply the INCLUDE/EXCLUDE rules strictly
-3. Output the list of test cases in the format below — do NOT generate test code yet
+3. Output the list of test cases in the format below before writing any test code
+4. Continue straight to Step 3 — do not stop to ask for approval. The list is printed so the
+   user can audit the plan against the generated tests, not to gate the run.
 
 #### Test Case Output Format
 
@@ -65,21 +67,7 @@ Examples:
 - `calculateTotal_emptyList_throwsIllegalArgumentException`
 - `getUser_unauthorized_returns401`
 
-### Step 3: Ask for User Review
-
-After outputting test cases, use the **AskUserQuestion tool** to ask the user:
-```
-Question: "Test cases are ready. Proceed with generating test code?"
-Header: "Next step"
-Options:
-  - Label: "Yes, generate tests" / Description: "Proceed to generate test files from the test cases above"
-  - Label: "No, let me review first" / Description: "Stop here so I can review and adjust the test cases"
-```
-
-- If user selects "Yes", proceed to Step 4
-- If user selects "No", STOP and wait for further instructions
-
-### Step 4: Generate Test Code
+### Step 3: Generate Test Code
 
 1. Determine code type and apply the matching rules:
    - **Controller** → Apply `controller-test-rules.md` (use `@WebMvcTest`, MockMvc patterns)
@@ -90,7 +78,7 @@ Options:
 3. Generate tests following all rules and the test cases from Step 2
 4. Create or update the test file using the Write tool
 
-### Step 5: Verify Compilation and Execution
+### Step 4: Verify Compilation and Execution
 
 1. Run compilation and fix any issues (max 5 attempts — see `compilation-verification.md`)
 2. Run the generated test class to verify all tests pass (see `test-execution-verification.md`)
@@ -139,12 +127,10 @@ Step 2: Agent outputs 7 test cases covering:
         - calculateTotal with empty list
         - cancelOrder for non-existent order
 
-Step 3: Agent asks user to review. User says "Yes, generate tests".
-
-Step 4: Agent generates OrderServiceTest.java with @ExtendWith(MockitoExtension.class),
+Step 3: Agent generates OrderServiceTest.java with @ExtendWith(MockitoExtension.class),
         mocked repository and payment service, 7 test methods.
 
-Step 5: Agent runs `mvn test -Dtest=OrderServiceTest -q`, all tests pass.
+Step 4: Agent runs `mvn test -Dtest=OrderServiceTest -q`, all tests pass.
 
 Result: Complete test file delivered with 7 passing tests.
 ```

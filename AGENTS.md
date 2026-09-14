@@ -10,8 +10,36 @@ Skills for generating unit tests with consistent quality. Each skill is self-con
 
 | Command                       | What it does                          |
 |-------------------------------|---------------------------------------|
-| `/generate-tests <file>`      | Full workflow: analyzes code, outputs test cases for review, generates test code |
+| `/generate-tests <file>`      | Full workflow, unattended: analyzes code, prints test case list, generates test code, verifies it |
 | `/generate-test-cases <file>` | Analysis only: outputs test case list without generating code |
+
+## No Interactive Prompts
+
+Skills in this repository never ask the user a question mid-run. No `AskUserQuestion`,
+no "reply yes to continue", no waiting on input of any kind. A skill takes its target,
+runs to completion, and reports.
+
+Two reasons, and the second is the one that actually forces it:
+
+**1. Portability.** These skills ship to Claude Code, to `openskills`, to `npx skills`,
+and through `AGENTS.md` to whatever agent the user runs. Interactive prompting is not a
+portable capability — most runtimes have no channel for it, and autonomous or headless
+runs (CI, batch jobs, background agents) have no human on the other end at all. A skill
+that blocks on an answer is a skill that hangs there.
+
+**2. In Claude Code it does not even reach the user.** Both skills declare
+`context: fork`, which runs them through the subagent path. That path filters the tool
+list through a deny-set that contains `AskUserQuestion` unconditionally — before any
+check of whether the agent is built-in or asynchronous. The `allowed-tools:` line in the
+frontmatter does not override it and does not warn: the tool is simply absent at runtime.
+Verified against the Claude Code 2.1.7 bundle. A review gate written this way is dead
+code — it never fires, and the reviewer never learns that it did not.
+
+The consequence for skill design: where a human checkpoint would have gone, print the
+information instead and keep going. `generate-tests` prints its test case list before
+writing any code, so the plan is on record and auditable against the result — but it
+does not wait for approval. A user who wants the checkpoint runs `/generate-test-cases`
+first, reads the list, and then runs `/generate-tests`.
 
 ## Rules Location
 
