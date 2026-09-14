@@ -149,15 +149,38 @@ class AdminControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    // The status for an unauthenticated request is decided by the configured
-    // AuthenticationEntryPoint: httpBasic gives 401, formLogin gives a 302 to the
-    // login page, and a chain with no entry point gives 403. Read the project's
-    // SecurityConfig and assert the status it actually produces.
+    // Status depends on the entry point — see "Unauthenticated Requests" below.
+    // This example assumes httpBasic.
     @Test
-    void deleteUser_unauthenticated_returns401() throws Exception {
+    void deleteUser_unauthenticated_returnsUnauthorized() throws Exception {
         mockMvc.perform(delete("/api/admin/users/1"))
                 .andExpect(status().isUnauthorized());
     }
+}
+```
+
+#### Unauthenticated Requests
+
+A request with no authentication does not have one correct status. The configured
+`AuthenticationEntryPoint` decides it, so read the project's `SecurityConfig` and
+assert what that chain actually produces:
+
+| Entry point in `SecurityConfig` | Status | Test name |
+|---|---|---|
+| `httpBasic()` | 401 Unauthorized | `..._unauthenticated_returnsUnauthorized` |
+| `formLogin()` | 302 redirect to the login page | `..._unauthenticated_redirectsToLogin` |
+| none configured | 403 Forbidden | `..._unauthenticated_returnsForbidden` |
+
+Name the test after the outcome you assert, not after a status code copied from
+another project:
+
+```java
+// formLogin: the chain redirects instead of challenging
+@Test
+void deleteUser_unauthenticated_redirectsToLogin() throws Exception {
+    mockMvc.perform(delete("/api/admin/users/1"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrlPattern("**/login"));
 }
 ```
 
