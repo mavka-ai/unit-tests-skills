@@ -9,6 +9,17 @@ tags: java, tests, controller, webmvc, mockmvc, spring
 
 Test Spring controllers using `@WebMvcTest` for isolated web layer tests. Keep controller tests focused on HTTP concerns: request mapping, validation, serialization, and status codes.
 
+### Why This Does Not Contradict "Do Not Start Frameworks"
+
+`domain-service-rules.md` and `java-test-template.md` forbid starting a framework in a
+unit test. `@WebMvcTest` does start a Spring context, so it is a **slice test**, not a
+pure unit test — and it is the one exception this distribution allows, because a
+controller's behaviour *is* the framework: routing, binding, validation and
+serialisation have no observable existence outside it. Calling a controller method
+directly tests a plain Java method and none of the things the controller is for.
+
+The exception is scoped to controllers. Everywhere else, no framework.
+
 ### Test Setup
 
 Use `@WebMvcTest` to load only the web layer for the target controller.
@@ -138,6 +149,11 @@ class AdminControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    // The status for an unauthenticated request is decided by the configured
+    // AuthenticationEntryPoint, not by Spring Security in general: httpBasic gives
+    // 401, formLogin gives a 302 to the login page, and a chain with no entry point
+    // gives 403. Read the project's SecurityConfig and assert what it actually
+    // produces — do not copy 401 from this example.
     @Test
     void deleteUser_unauthenticated_returns401() throws Exception {
         mockMvc.perform(delete("/api/admin/users/1"))

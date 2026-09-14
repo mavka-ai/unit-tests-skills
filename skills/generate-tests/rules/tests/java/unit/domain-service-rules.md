@@ -15,6 +15,10 @@ Use Mockito for unit testing services and domain logic. Keep tests fast and isol
 - Do NOT start frameworks or containers for unit tests
 - Mock external dependencies, not the system under test
 - Never mock simple value objects
+- Capture arguments in `verify(...)`, never inside `when(...)` — Mockito's own
+  documentation recommends captors for verification only. A captor inside a stub
+  records only the calls that stub matched, so a test that never reaches the stub
+  passes with an empty captor instead of failing
 
 **Incorrect:**
 
@@ -45,8 +49,11 @@ void processOrder_validOrder_calculatesCorrectly() {
 **Correct:**
 
 ```java
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -75,14 +82,16 @@ class OrderServiceTest {
         // Given
         var request = new OrderRequest("product-1", 5);
         var savedOrder = new Order("order-123", "product-1", 5);
-        var captor = ArgumentCaptor.forClass(Order.class);
-        when(orderRepository.save(captor.capture())).thenReturn(savedOrder);
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
         // When
         Order actualOrder = orderService.createOrder(request);
 
         // Then
         assertThat(actualOrder.getId()).isEqualTo("order-123");
+
+        var captor = ArgumentCaptor.forClass(Order.class);
+        verify(orderRepository).save(captor.capture());
         Order capturedOrder = captor.getValue();
         assertThat(capturedOrder.getProductId()).isEqualTo("product-1");
         assertThat(capturedOrder.getQuantity()).isEqualTo(5);

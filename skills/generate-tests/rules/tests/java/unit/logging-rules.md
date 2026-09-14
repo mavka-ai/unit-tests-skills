@@ -9,6 +9,24 @@ tags: java, tests, logging, output-capture, stdout, stderr
 
 Use `OutputCaptureExtension` to capture and verify log output in tests.
 
+### First: Decide Whether to Test the Log at All
+
+A log line is usually an implementation detail. Asserting on it couples the test to
+wording that any refactor may change, which is exactly what
+`general-principles.md` ("test behaviour, not implementation") and
+`what-makes-good-test.md` ("Resilience") warn against. Do not add a log assertion
+just because the method happens to log.
+
+Assert on log output only when the log **is** the observable contract:
+
+- the method's entire job is to emit a record (audit trail, security event)
+- there is no other observable effect (a `void` method whose only outcome is the log)
+- a specific message is required by an operational contract — an alert rule, a log
+  parser, a compliance requirement
+
+Otherwise assert on the return value or the mock interaction instead, and let the
+logging change freely.
+
 ### Rules
 
 - When testing log output or stdout/stderr, use `@ExtendWith(OutputCaptureExtension.class)`

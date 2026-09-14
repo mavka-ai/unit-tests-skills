@@ -14,7 +14,7 @@ After generating test files, verify they compile successfully. Fix any issues be
 | Build System | Command |
 |--------------|---------|
 | Maven | `mvn test-compile -q` |
-| Gradle | `gradle testClasses -q` |
+| Gradle | `./gradlew testClasses -q` (use the wrapper; a bare `gradle` may be absent or the wrong version) |
 | npm/yarn | `npm run build` or `npx tsc --noEmit` |
 | Python | `python -m py_compile <test_file>` |
 | Go | `go build ./...` |

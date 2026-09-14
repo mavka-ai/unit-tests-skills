@@ -48,6 +48,11 @@ void process_validInput_returnsValidResult() {
 
 A test should contain all information needed to understand it without looking elsewhere.
 
+The line this draws with Conciseness below: **every value the assertion depends on
+must be visible inside the test method**; everything the assertion does not depend
+on should be hidden behind a helper. `@BeforeEach` and shared constants are fine for
+the second kind and wrong for the first.
+
 **Incorrect:**
 
 ```java
@@ -131,12 +136,17 @@ assertThat(response.getBody())
 **Correct:**
 
 ```java
-// Resilient: only checks relevant fields
-assertThat(response.getBody())
-    .contains("\"name\":\"John\"");
-// Or use jsonPath
-assertThat(jsonPath("$.name").value("John"));
+// Resilient: names the fields it cares about, ignores order and formatting
+mockMvc.perform(get("/api/users/1"))
+        .andExpect(jsonPath("$.name").value("John"))
+        .andExpect(jsonPath("$.age").value(30));
 ```
+
+Note that `jsonPath(...)` returns a `ResultMatcher` — it is passed to
+`andExpect(...)`, never wrapped in `assertThat(...)`. Outside MockMvc, assert on
+the parsed object rather than on the raw JSON string; substring matching on JSON
+(`.contains("\"name\":\"John\"")`) only trades field order for whitespace
+sensitivity.
 
 ### Summary Checklist
 

@@ -16,7 +16,7 @@ After tests compile successfully, run them and verify they pass. Tests that comp
 | Build System | Command |
 |--------------|---------|
 | Maven | `mvn test -Dtest={TestClassName} -q` |
-| Gradle | `gradle test --tests "{fully.qualified.TestClassName}" -q` |
+| Gradle | `./gradlew test --tests "{fully.qualified.TestClassName}" -q` (use the wrapper) |
 | npm/yarn | `npx jest {testFile}` or `npm test -- --testPathPattern={testFile}` |
 | Python | `python -m pytest {test_file} -v` |
 | Go | `go test -run {TestFuncName} ./...` |
@@ -30,9 +30,15 @@ After tests compile successfully, run them and verify they pass. Tests that comp
    - Repeat (max 3 fix attempts per failing test)
 
 3. **If a test cannot be fixed after 3 attempts:**
-   - Remove the failing test method
-   - Add a `// TODO:` comment explaining what was intended and why it failed
-   - Inform the user about the removed test
+   - Do NOT delete it. A test you could not make pass is the most informative
+     output of the whole run — it is either a bug in the production code or a
+     wrong assumption about it, and deleting it destroys that signal while
+     leaving a green build that looks like success.
+   - Annotate it `@Disabled("<what it asserts, and the failure you could not resolve>")`
+     so it stays in the file, stays visible in the test report, and stays runnable
+     once the cause is understood
+   - Report it explicitly in the summary: the test name, what it asserts, the
+     actual failure, and which of the two explanations you think is more likely
 
 ### Common Failure Causes and Fixes
 

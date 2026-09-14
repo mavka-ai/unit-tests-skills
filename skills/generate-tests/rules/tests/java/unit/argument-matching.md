@@ -72,9 +72,35 @@ void sendNotification_validUser_sendsCorrectEmail() {
 }
 ```
 
-### When `any()` is Acceptable
+### Stubbing and Verification Are Different Positions
 
-Use `any()` only for:
+This rule constrains **verification**, not stubbing. A stub answers "what should
+the mock return"; a verification answers "what did the code actually pass". Only
+the second is an assertion, so only the second has to name real values.
+
+`any()` inside `when(...)` paired with a captor inside `verify(...)` is the correct
+combination — the stub stays loose so the call reaches the code under test, and the
+captor does the checking:
+
+```java
+// Given
+when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+
+// When
+orderService.createOrder(new OrderRequest("product-1", 5));
+
+// Then — the assertion lives here, on real captured values
+var captor = ArgumentCaptor.forClass(Order.class);
+verify(orderRepository).save(captor.capture());
+assertThat(captor.getValue().getProductId()).isEqualTo("product-1");
+```
+
+Never put `captor.capture()` inside `when(...)`. A captor in a stub records only
+what that stub matched, and Mockito documents captors as a verification tool.
+
+### When `any()` is Acceptable in Verification
+
+Use `any()` in a `verify(...)` only for:
 - Primitive types where the exact value doesn't matter
 - Simple types (String, Integer) when focus is on other behavior
 - Verify that method was called at all (existence check)
@@ -97,8 +123,10 @@ private ArgumentCaptor<Order> orderCaptor;
 // Or create inline
 var captor = ArgumentCaptor.forClass(Order.class);
 
-// For collections
-var listCaptor = ArgumentCaptor.forClass(List.class);
+// For generic types — forClass is raw, so declare the captor's type explicitly
+// or use @Captor, which keeps the generics
+@Captor
+private ArgumentCaptor<List<Order>> orderListCaptor;
 
 // Verify multiple calls
 verify(repository, times(2)).save(captor.capture());

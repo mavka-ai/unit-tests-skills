@@ -83,7 +83,8 @@ Examples:
 1. Run compilation and fix any issues (max 5 attempts — see `compilation-verification.md`)
 2. Run the generated test class to verify all tests pass (see `test-execution-verification.md`)
 3. Fix any failing tests — do NOT modify production code
-4. If a test cannot be fixed after 3 attempts, remove it and inform the user
+4. If a test cannot be fixed after 3 attempts, mark it `@Disabled` with the reason and
+   report it — do NOT delete it (see `test-execution-verification.md`)
 
 ---
 
