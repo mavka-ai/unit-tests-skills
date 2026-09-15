@@ -81,6 +81,52 @@ void createUser_validInput_returnsCompleteUser() {
 }
 ```
 
+### One Trigger Per Test, Even When the Outcome Is Shared
+
+The section above allows many assertions about **one** behaviour. It does not allow
+many **causes** in one test. Validation is where this goes wrong most often: several
+constraints share a single outcome — "the form comes back with errors" — which makes
+merging them look like one scenario.
+
+**Incorrect:**
+
+```java
+@Test
+void processCreationForm_blankNamesAndCity_returnsFormWithFieldErrors() throws Exception {
+    mockMvc.perform(post("/owners/new").param("firstName", "")
+                    .param("lastName", "")
+                    .param("city", ""))
+            .andExpect(model().attributeHasFieldErrors("owner", "firstName", "lastName", "city"));
+}
+```
+
+Three constraints are tripped at once. When this goes red it does not say which one
+regressed — and if two of the three stop rejecting, it still passes on the third.
+
+**Correct** — one constraint per test, every other field valid:
+
+```java
+@Test
+void processCreationForm_blankFirstName_returnsFormWithFirstNameError() throws Exception {
+    mockMvc.perform(post("/owners/new").param("firstName", "")
+                    .param("lastName", "Bloggs")
+                    .param("address", "123 Caramel Street")
+                    .param("city", "London")
+                    .param("telephone", "1316761638"))
+            .andExpect(model().attributeHasFieldErrors("owner", "firstName"));
+}
+```
+
+...and one more each for `lastName` and `city`.
+
+Keep every field except the one under test valid, so the only reason the request can
+be rejected is the constraint being tested. The check: if you could delete one of the
+inputs and still have a failing case for a different reason, those are separate
+scenarios.
+
+A test name that needs "and" to describe its input is the same signal as the "and" in
+the list below.
+
 ### Signs Your Test Is Not Focused
 
 - Test name uses "and" (e.g., `testDepositAndWithdraw`)

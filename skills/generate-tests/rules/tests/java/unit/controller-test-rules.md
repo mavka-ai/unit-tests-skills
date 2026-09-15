@@ -88,6 +88,26 @@ class UserControllerTest {
 
 ### Request Validation Testing
 
+When a field carries **more than one** constraint, assert the constraint that should
+have rejected the input, not merely that the field has an error. `attributeHasFieldErrors`
+passes on any error on that field, so it keeps passing after the constraint under test
+is removed — as long as a different one still fires.
+
+```java
+// telephone is annotated @NotBlank AND @Pattern(regexp = "\\d{10}")
+
+// Weak: also passes if @Pattern is deleted, because @NotBlank still rejects ""
+.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
+
+// Names the constraint under test
+.andExpect(model().attributeHasFieldErrorCode("owner", "telephone", "Pattern"))
+```
+
+The code is the constraint's simple name — `NotBlank`, `Size`, `Pattern`, `Email` — or
+the code passed to `result.rejectValue(field, code, message)` for a rejection the
+handler makes itself.
+
+
 ```java
 @Test
 void createUser_blankName_returns400() throws Exception {
@@ -183,6 +203,37 @@ void deleteUser_unauthenticated_redirectsToLogin() throws Exception {
             .andExpect(redirectedUrlPattern("**/login"));
 }
 ```
+
+### Redirects
+
+A handler that returns `"redirect:/..."` decides two things: that it redirects, and
+where to. Assert both — a flash-attribute assertion alone leaves the destination
+untested, and the destination is usually built from data the handler produced.
+
+```java
+@Test
+void processCreationForm_validOwner_redirectsToCreatedOwner() throws Exception {
+    // Given - the id the redirect path is built from is assigned on save
+    given(this.owners.save(any(Owner.class))).willAnswer(invocation -> {
+        Owner saved = invocation.getArgument(0);
+        saved.setId(42);
+        return saved;
+    });
+
+    // When-Then
+    mockMvc.perform(post("/owners/new").param("firstName", "Joe")
+                    .param("lastName", "Bloggs")
+                    .param("address", "123 Caramel Street")
+                    .param("city", "London")
+                    .param("telephone", "1316761638"))
+            .andExpect(redirectedUrl("/owners/42"));
+}
+```
+
+Assert `redirectedUrl(...)` for a concrete path and `redirectedUrlPattern(...)` where
+part of it varies. `view().name("redirect:/owners/{ownerId}")` asserts the unresolved
+template and says nothing about the values substituted into it, so prefer
+`redirectedUrl` when the substituted value is the point.
 
 ### Service Exception Handling
 
