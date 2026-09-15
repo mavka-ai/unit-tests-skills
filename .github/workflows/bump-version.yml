@@ -1,0 +1,81 @@
+name: Bump Version
+
+# The plugin version is CalVer (YYYY.M.D) and exists to tell a user which
+# snapshot they have installed. Claude Code decides whether to update from
+# gitCommitSha, never from this field, so the bump is metadata for humans and
+# cannot break delivery.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Two pushes in quick succession would otherwise race to commit the same bump.
+concurrency:
+  group: bump-version
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Set version to today
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Compute today's version
+        id: version
+        # %-m / %-d strip the leading zero. "2026.09.15" is not valid semver --
+        # the spec forbids leading zeros in numeric identifiers -- and
+        # `claude plugin validate --strict` does NOT reject it, so nothing
+        # downstream would catch such a version. It must never be generated.
+        run: echo "value=$(date -u +%Y.%-m.%-d)" >> "${GITHUB_OUTPUT}"
+
+      - name: Apply the version
+        id: apply
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          set -euo pipefail
+
+          # Idempotent: a second push on the same day, or a version already
+          # bumped by hand, must not produce an empty commit (which fails).
+          current="$(jq -r '.version' .claude-plugin/plugin.json)"
+          if [ "${current}" = "${VERSION}" ]; then
+            echo "Already at ${VERSION} -- nothing to do."
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          tmp="$(mktemp)"
+          jq --arg v "${VERSION}" '.version = $v' .claude-plugin/plugin.json > "${tmp}"
+          mv "${tmp}" .claude-plugin/plugin.json
+
+          # CITATION.cff carries the same version plus the release date, so a
+          # citation resolves to an identifiable snapshot.
+          sed -i "s/^version: .*/version: ${VERSION}/" CITATION.cff
+          sed -i "s/^date-released: .*/date-released: '$(date -u +%Y-%m-%d)'/" CITATION.cff
+
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
+          echo "${current} -> ${VERSION}"
+
+      - name: Commit and push
+        if: steps.apply.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          set -euo pipefail
+
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .claude-plugin/plugin.json CITATION.cff
+          git commit -m "chore: set version to ${VERSION}"
+
+          # No loop guard is needed: a push authenticated with GITHUB_TOKEN
+          # does not trigger workflow runs, so this commit cannot re-enter
+          # this workflow.
+          git push
