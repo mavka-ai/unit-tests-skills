@@ -4,6 +4,8 @@ message: >-
   If you use these skills in your work, please cite them
   using the metadata from this file.
 type: software
+version: 2026.9.15
+date-released: '2026-09-15'
 abstract: >-
   A collection of AI agent skills for generating high-quality
   unit tests, encoding battle-tested testing principles that
