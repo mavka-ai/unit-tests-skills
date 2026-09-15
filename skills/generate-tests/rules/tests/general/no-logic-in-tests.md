@@ -20,7 +20,7 @@ Simplicity is more important than avoiding duplication in tests.
 ```java
 @Test
 public void getPhotosPageUrl() {
-    String baseUrl = "http://photos.google.com/";
+    String baseUrl = "https://photos.google.com/";
     UrlBuilder urlBuilder = new UrlBuilder(baseUrl);
 
     String photosPageUrl = urlBuilder.getPhotosPageUrl();
@@ -35,12 +35,12 @@ public void getPhotosPageUrl() {
 ```java
 @Test
 public void getPhotosPageUrl_happyPath() {
-    UrlBuilder urlBuilder = new UrlBuilder("http://photos.google.com/");
+    UrlBuilder urlBuilder = new UrlBuilder("https://photos.google.com/");
 
     String actualUrl = urlBuilder.getPhotosPageUrl();
 
-    // Explicit literal - bug is obvious: "http://photos.google.com//u/0/photos"
-    assertThat(actualUrl).isEqualTo("http://photos.google.com/u/0/photos");
+    // Explicit literal - bug is obvious: "https://photos.google.com//u/0/photos"
+    assertThat(actualUrl).isEqualTo("https://photos.google.com/u/0/photos");
 }
 ```
 
