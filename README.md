@@ -138,7 +138,7 @@ marketplace also uninstalls plugins installed from it.
 
 | Skill | Command | Plugin command | Description |
 |-------|---------|----------------|-------------|
-| Generate Tests | `/generate-tests <target>` | `/unit-tests-skills:generate-tests <target>` | Full workflow: analyzes code, outputs test cases for review, then generates test code. Supports Java (JUnit 5, Mockito, AssertJ). |
+| Generate Tests | `/generate-tests <target>` | `/unit-tests-skills:generate-tests <target>` | Full workflow, unattended: analyzes code, prints the test case list, generates test code, verifies it compiles and passes. Supports Java (JUnit 5, Mockito, AssertJ). |
 | Generate Test Cases | `/generate-test-cases <target>` | `/unit-tests-skills:generate-test-cases <target>` | Analysis only: outputs a structured list of test cases in Given-When-Then format without generating code. |
 
 Claude Code namespaces plugin skills by plugin name, so the command depends on

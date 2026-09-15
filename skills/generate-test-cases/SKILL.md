@@ -2,7 +2,6 @@
 name: generate-test-cases
 description: "Use when the user asks to analyze code for test coverage, list what test cases are needed, or review testing strategy — WITHOUT generating actual test code."
 allowed-tools: Read, Glob, Grep
-context: fork
 ---
 
 # Generate Test Cases Skill
@@ -38,7 +37,10 @@ You will analyze code and generate a list of test cases that should be written f
    - Security annotations (if present)
 2. Apply the INCLUDE/EXCLUDE rules strictly
 3. Output the list of test cases in the specified format
-4. Do NOT generate actual test code — only the test case descriptions
+4. Stop at the descriptions — the list itself is this skill's deliverable
+5. Close by naming the next step: `generate-tests <target>` takes this list as its plan
+   and writes the code from it. Hand the list forward as it stands — the user can review
+   or amend it first
 
 ---
 

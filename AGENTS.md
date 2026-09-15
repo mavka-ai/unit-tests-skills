@@ -10,8 +10,28 @@ Skills for generating unit tests with consistent quality. Each skill is self-con
 
 | Command                       | What it does                          |
 |-------------------------------|---------------------------------------|
-| `/generate-tests <file>`      | Full workflow: analyzes code, outputs test cases for review, generates test code |
+| `/generate-tests <file>`      | Full workflow, unattended: analyzes code, prints test case list, generates test code, verifies it |
 | `/generate-test-cases <file>` | Analysis only: outputs test case list without generating code |
+
+## Recommended Workflow
+
+The skills are meant to run in sequence, and the agent is the one that chains them:
+`generate-test-cases` produces the plan, `generate-tests` generates from that plan
+instead of analyzing the target a second time. Both analyze the same way and print the
+same list, so invoking the second without handing it the first one's output does the
+work twice.
+
+1. `generate-test-cases <target>` — lists the cases as Given-When-Then, writes no code
+2. `generate-tests <target>` — generates from that list, naming what it added or dropped
+
+`/generate-tests` invoked on its own is the safe fallback, not a second path to
+maintain: with no list in front of it, it builds one in its own Step 2 and prints it
+before writing code. Each skill runs end to end without stopping for input, so that
+printed list is the record of what it decided to do.
+
+This file guides agents working **on this repository**. The copy that reaches consuming
+projects is [`templates/AGENTS-SNIPPET.md`](templates/AGENTS-SNIPPET.md) — a change to
+the workflow belongs in both.
 
 ## Rules Location
 
@@ -134,6 +154,17 @@ Steps:
 2. Second step
 3. ...
 ```
+
+### Tools a Skill May Declare
+
+Keep `allowed-tools` to tools every agent runtime provides. `AskUserQuestion` is
+Claude Code's own — Codex and the other agents this distribution targets
+(`README.md`, "Recommended for other agents") have no equivalent, so a skill that
+stops to ask the user works in one runtime and silently does nothing in the rest.
+
+Skills here run end to end and print what they decided instead. Do not add a tool
+that pauses for input, and do not set `context: fork` — a forked skill's output does
+not reach the user, which is the whole point of printing the plan.
 
 ## Adding a New Rule
 

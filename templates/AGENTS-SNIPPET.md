@@ -28,13 +28,27 @@ This project uses unit test generation skills.
 <available_skills>
   <skill>
     <name>generate-tests</name>
-    <description>Use when the user asks to generate, create, or write unit tests for code. Analyzes the target code, produces a structured test case list for review, then generates test code. Supports Java (JUnit 5, Mockito, AssertJ).</description>
+    <description>Use when the user asks to generate, create, write, or add unit tests for existing code, or to cover a class, method, or file with tests — including Java targets using JUnit 5, Mockito, or AssertJ. Not for analysis-only requests that stop at listing test cases.</description>
   </skill>
   <skill>
     <name>generate-test-cases</name>
     <description>Use when the user asks to analyze code for test coverage, list what test cases are needed, or review testing strategy — WITHOUT generating actual test code.</description>
   </skill>
 </available_skills>
+
+### Workflow
+
+When asked to write tests for a target, run the two skills in order — do not go
+straight to `generate-tests`:
+
+1. Invoke `generate-test-cases <target>`. Its Given-When-Then list is the plan, and
+   it stays visible so the tests can be checked against it.
+2. Invoke `generate-tests <target>` and generate from **that** list. Do not re-analyse
+   the target from scratch; name any case you add or drop, and why.
+
+Stop after step 1 only when the user asked for the analysis alone. A user who runs
+`/generate-tests` directly still gets the list first — the skill prints its own plan
+before writing code.
 
 ### Key Principles
 
