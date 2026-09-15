@@ -36,14 +36,19 @@ This project uses unit test generation skills.
   </skill>
 </available_skills>
 
-### Recommended Workflow
+### Workflow
 
-1. `/generate-test-cases <file>` — lists the cases as Given-When-Then, writes no code
-2. Review the list; say which cases to add, drop or reword
-3. `/generate-tests <file>` — generates the tests from that list and verifies them
+When asked to write tests for a target, run the two skills in order — do not go
+straight to `generate-tests`:
 
-Run `/generate-tests` on its own when the review step is not needed — it prints the
-same list before writing code, then continues.
+1. Invoke `generate-test-cases <target>`. Its Given-When-Then list is the plan, and
+   it stays visible so the tests can be checked against it.
+2. Invoke `generate-tests <target>` and generate from **that** list. Do not re-analyse
+   the target from scratch; name any case you add or drop, and why.
+
+Stop after step 1 only when the user asked for the analysis alone. A user who runs
+`/generate-tests` directly still gets the list first — the skill prints its own plan
+before writing code.
 
 ### Key Principles
 

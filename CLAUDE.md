@@ -32,11 +32,13 @@ templates/
 
 ## Workflow
 
-The recommended sequence is `/generate-test-cases` → review the list → `/generate-tests`,
-which puts the plan in front of the user before any code is written. See
-[AGENTS.md](AGENTS.md#recommended-workflow).
+The recommended sequence is `generate-test-cases` → `generate-tests`, chained by the
+agent: the first produces the plan, the second generates from that plan rather than
+analyzing the target again. It also puts the list in front of the user before any code
+is written, so it can be reviewed. See [AGENTS.md](AGENTS.md#recommended-workflow).
 
-`/generate-tests` on its own handles the complete workflow internally:
+`/generate-tests` on its own is the fallback, and handles the complete workflow
+internally:
 
 1. Analyzes code and outputs a structured test case list
 2. Generates test code

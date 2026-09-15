@@ -30,7 +30,14 @@ You will analyze code and generate high-quality unit tests for a given target.
    - If found, read fully — you will add missing tests to it, not create a new file
    - If not found, scan 2-3 neighboring test classes to learn project conventions
 
-### Step 2: Generate Test Cases
+### Step 2: Establish the Test Case List
+
+**If a test case list for this target is already present** — `generate-test-cases` ran
+first, whether the user invoked it or the agent did — that list is the plan. Generate
+from it. Do not re-analyze the target from scratch; where your reading of the code
+differs, name the cases you add or drop and why, so the change to the plan is visible.
+
+**If there is no such list**, produce one here before writing any test code:
 
 1. Analyze ALL code branches, including:
    - Success paths
@@ -39,13 +46,10 @@ You will analyze code and generate high-quality unit tests for a given target.
    - Private/protected methods called by the target
    - Security annotations (if present)
 2. Apply the INCLUDE/EXCLUDE rules strictly
-3. If a test case list for this target is already present — the user ran
-   `/generate-test-cases` first and reviewed it — treat that list as the approved plan
-   and generate from it. Where your analysis differs, say which cases you added or
-   dropped and why, so the user sees the plan they reviewed change.
-4. Output the list of test cases in the format below before writing any test code
-5. Continue straight to Step 3. The list is printed so the user can audit the plan
-   against the generated tests afterwards; the run stays unattended end to end.
+3. Output the list in the format below
+
+Either way, continue straight to Step 3. The list is printed so the user can audit the
+plan against the generated tests afterwards; the run stays unattended end to end.
 
 #### Test Case Output Format
 

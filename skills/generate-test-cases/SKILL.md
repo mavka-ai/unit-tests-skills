@@ -38,8 +38,9 @@ You will analyze code and generate a list of test cases that should be written f
 2. Apply the INCLUDE/EXCLUDE rules strictly
 3. Output the list of test cases in the specified format
 4. Stop at the descriptions — the list itself is this skill's deliverable
-5. Close by naming the next step: `/generate-tests <target>` generates the code from
-   this list, so the user can review the list first and then run it
+5. Close by naming the next step: `generate-tests <target>` takes this list as its plan
+   and writes the code from it. Hand the list forward as it stands — the user can review
+   or amend it first
 
 ---
 

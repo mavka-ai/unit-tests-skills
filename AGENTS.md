@@ -15,15 +15,23 @@ Skills for generating unit tests with consistent quality. Each skill is self-con
 
 ## Recommended Workflow
 
-Run the two skills in sequence when the plan is worth reviewing before any code exists:
+The skills are meant to run in sequence, and the agent is the one that chains them:
+`generate-test-cases` produces the plan, `generate-tests` generates from that plan
+instead of analyzing the target a second time. Both analyze the same way and print the
+same list, so invoking the second without handing it the first one's output does the
+work twice.
 
-1. `/generate-test-cases <file>` — lists the cases as Given-When-Then, writes no code
-2. Read the list; say which cases to add, drop or reword
-3. `/generate-tests <file>` — generates the tests from that list and verifies them
+1. `generate-test-cases <target>` — lists the cases as Given-When-Then, writes no code
+2. `generate-tests <target>` — generates from that list, naming what it added or dropped
 
-`/generate-tests` on its own covers the same ground in one pass: it prints the test case
-list before writing any code, then keeps going. Each skill runs end to end without
-stopping for input, so that printed list is the record of what it decided to do.
+`/generate-tests` invoked on its own is the safe fallback, not a second path to
+maintain: with no list in front of it, it builds one in its own Step 2 and prints it
+before writing code. Each skill runs end to end without stopping for input, so that
+printed list is the record of what it decided to do.
+
+This file guides agents working **on this repository**. The copy that reaches consuming
+projects is [`templates/AGENTS-SNIPPET.md`](templates/AGENTS-SNIPPET.md) — a change to
+the workflow belongs in both.
 
 ## Rules Location
 
