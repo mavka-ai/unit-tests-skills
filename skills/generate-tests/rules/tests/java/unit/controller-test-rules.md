@@ -94,13 +94,13 @@ passes on any error on that field, so it keeps passing after the constraint unde
 is removed — as long as a different one still fires.
 
 ```java
-// telephone is annotated @NotBlank AND @Pattern(regexp = "\\d{10}")
+// phone is annotated @NotBlank AND @Pattern(regexp = "\\d{10}")
 
 // Weak: also passes if @Pattern is deleted, because @NotBlank still rejects ""
-.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
+.andExpect(model().attributeHasFieldErrors("user", "phone"))
 
 // Names the constraint under test
-.andExpect(model().attributeHasFieldErrorCode("owner", "telephone", "Pattern"))
+.andExpect(model().attributeHasFieldErrorCode("user", "phone", "Pattern"))
 ```
 
 The code is the constraint's simple name — `NotBlank`, `Size`, `Pattern`, `Email` — or
@@ -192,17 +192,7 @@ assert what that chain actually produces:
 | none configured | 403 Forbidden | `..._unauthenticated_returnsForbidden` |
 
 Name the test after the outcome you assert, not after a status code copied from
-another project:
-
-```java
-// formLogin: the chain redirects instead of challenging
-@Test
-void deleteUser_unauthenticated_redirectsToLogin() throws Exception {
-    mockMvc.perform(delete("/api/admin/users/1"))
-            .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrlPattern("**/login"));
-}
-```
+another project.
 
 ### Redirects
 
@@ -211,29 +201,14 @@ where to. Assert both — a flash-attribute assertion alone leaves the destinati
 untested, and the destination is usually built from data the handler produced.
 
 ```java
-@Test
-void processCreationForm_validOwner_redirectsToCreatedOwner() throws Exception {
-    // Given - the id the redirect path is built from is assigned on save
-    given(this.owners.save(any(Owner.class))).willAnswer(invocation -> {
-        Owner saved = invocation.getArgument(0);
-        saved.setId(42);
-        return saved;
-    });
-
-    // When-Then
-    mockMvc.perform(post("/owners/new").param("firstName", "Joe")
-                    .param("lastName", "Bloggs")
-                    .param("address", "123 Caramel Street")
-                    .param("city", "London")
-                    .param("telephone", "1316761638"))
-            .andExpect(redirectedUrl("/owners/42"));
-}
+.andExpect(redirectedUrl("/users/42"));         // concrete path
+.andExpect(redirectedUrlPattern("**/login"));   // when part of the path varies
 ```
 
-Assert `redirectedUrl(...)` for a concrete path and `redirectedUrlPattern(...)` where
-part of it varies. `view().name("redirect:/owners/{ownerId}")` asserts the unresolved
-template and says nothing about the values substituted into it, so prefer
-`redirectedUrl` when the substituted value is the point.
+Where the path carries an id the handler produced, stub the save to assign it, so the
+assertion names a concrete path. `view().name("redirect:/users/{id}")` asserts the
+unresolved template and says nothing about the value substituted into it, so prefer
+`redirectedUrl` when that value is the point.
 
 ### Service Exception Handling
 

@@ -92,11 +92,11 @@ merging them look like one scenario.
 
 ```java
 @Test
-void processCreationForm_blankNamesAndCity_returnsFormWithFieldErrors() throws Exception {
-    mockMvc.perform(post("/owners/new").param("firstName", "")
+void createUser_blankNamesAndCity_returnsFormWithFieldErrors() throws Exception {
+    mockMvc.perform(post("/users/new").param("firstName", "")
                     .param("lastName", "")
                     .param("city", ""))
-            .andExpect(model().attributeHasFieldErrors("owner", "firstName", "lastName", "city"));
+            .andExpect(model().attributeHasFieldErrors("user", "firstName", "lastName", "city"));
 }
 ```
 
@@ -107,13 +107,12 @@ regressed — and if two of the three stop rejecting, it still passes on the thi
 
 ```java
 @Test
-void processCreationForm_blankFirstName_returnsFormWithFirstNameError() throws Exception {
-    mockMvc.perform(post("/owners/new").param("firstName", "")
-                    .param("lastName", "Bloggs")
-                    .param("address", "123 Caramel Street")
+void createUser_blankFirstName_returnsFormWithFirstNameError() throws Exception {
+    mockMvc.perform(post("/users/new").param("firstName", "")
+                    .param("lastName", "Smith")
                     .param("city", "London")
-                    .param("telephone", "1316761638"))
-            .andExpect(model().attributeHasFieldErrors("owner", "firstName"));
+                    .param("phone", "5550123456"))
+            .andExpect(model().attributeHasFieldErrors("user", "firstName"));
 }
 ```
 
