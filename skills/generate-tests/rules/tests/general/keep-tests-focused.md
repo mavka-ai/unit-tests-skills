@@ -66,26 +66,25 @@ void withdraw_withinOverdraftLimit_succeeds() {
 
 ### When Multiple Assertions Are OK
 
-Multiple assertions are fine when **none of them depends on a decision the code makes**.
-Fields the code copies across from the input by identity are one claim, not several
-behaviours, so they belong in one test. A field whose value the code decides — a default,
-a clock, a generator, a transformation — is a behaviour of its own, and
-`assert-every-field-the-code-writes.md` says where it goes.
+Multiple assertions are fine when a failure of any one of them means the outcome named in
+the test is wrong. An assertion that could fail while the named outcome is still right is
+a separate behaviour and needs its own test.
 
 ```java
 @Test
 void create_validInput_returnsUserWithSubmittedIdentity() {
     User actualUser = userService.create(newUserRequest("john@test.com", "John", "Smith"));
 
-    // Three fields, one claim: the submitted identity is carried across unchanged
+    // Drop any one of these and the submitted identity is no longer checked
     assertThat(actualUser.getEmail()).isEqualTo("john@test.com");
     assertThat(actualUser.getFirstName()).isEqualTo("John");
     assertThat(actualUser.getLastName()).isEqualTo("Smith");
 }
 ```
 
-The service also assigns `status` and `createdAt`. Each is a decision, so each is its own
-test — `create_validInput_setsStatusActive`, `create_validInput_stampsCreatedAtFromClock`.
+The service also assigns `status` and `createdAt`. Either could be wrong while the
+submitted identity is still carried across correctly, so each belongs in its own test —
+`create_validInput_setsStatusActive`, `create_validInput_stampsCreatedAtFromClock`.
 Splitting them out is not dropping them: `assert-every-field-the-code-writes.md` requires
 every assigned field to be asserted by some test, and names the check that catches a field
 no test covers.
