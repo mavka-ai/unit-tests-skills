@@ -12,10 +12,8 @@ Capture and verify actual arguments instead of using `any()` matchers for DTOs a
 ### Rules
 
 - In `verify(...)`, capture DTO/model arguments with `ArgumentCaptor` and assert their
-  fields — `any(...)` in that position asserts nothing about the data. Which fields is
-  not a judgment call: `general/assert-every-field-the-code-writes.md` sets the list to
-  every field the code under test assigns on this path, and its identity/decision split
-  says which test asserts which
+  fields — `any(...)` in that position asserts nothing about the data. Which fields
+  belong in which test follows `general/keep-tests-focused.md`
 - In `when(...)`, `any(...)` is the right choice: a stub decides what the mock returns,
   it makes no assertion. See "Stubbing and Verification Are Different Positions" below
 

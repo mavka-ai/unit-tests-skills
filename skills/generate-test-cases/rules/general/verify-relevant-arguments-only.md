@@ -96,10 +96,8 @@ public void sendEmail_allFieldsAreCorrect() {
 
 This rule stops at the boundary of the captured object. Which *arguments* of the call to
 pin is decided here; which *fields inside* a captured object to assert is decided by
-`assert-every-field-the-code-writes.md`, and the answer there is every field the code
-under test assigns. None of those fields may go unasserted; which test asserts which is
-decided by the identity/decision split in that rule. A written field that no test asserts
-anywhere is how a test keeps passing while that field goes wrong.
+`keep-tests-focused.md` — assert together the fields whose failure means the outcome in
+the test's name is wrong, and give a field that could be wrong on its own its own test.
 
 ```java
 @Test

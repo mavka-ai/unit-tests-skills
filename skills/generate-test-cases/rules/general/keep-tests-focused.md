@@ -85,9 +85,8 @@ void create_validInput_returnsUserWithSubmittedIdentity() {
 The service also assigns `status` and `createdAt`. Either could be wrong while the
 submitted identity is still carried across correctly, so each belongs in its own test —
 `create_validInput_setsStatusActive`, `create_validInput_stampsCreatedAtFromClock`.
-Splitting them out is not dropping them: `assert-every-field-the-code-writes.md` requires
-every assigned field to be asserted by some test, and names the check that catches a field
-no test covers.
+Splitting them out is not dropping them — a field moved to its own test is still asserted;
+a field left out of every test is not.
 
 The same criterion applies to causes, not just assertions: widening the name
 (`..._returnsFormWithFieldErrors`) does not make three tripped constraints one behaviour.

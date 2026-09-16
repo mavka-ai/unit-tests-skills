@@ -99,7 +99,5 @@ Everywhere else, a shape assertion means the value assertion has not been writte
 
 ### Related
 
-- `assert-every-field-the-code-writes.md` — the same failure one level down, inside an
-  object the code built.
 - `match-the-assertion-to-the-test-name.md` — for outcomes that several different inputs
   share.
