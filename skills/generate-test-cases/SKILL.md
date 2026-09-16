@@ -134,3 +134,7 @@ Step 2: Agent outputs:
 - `./rules/general/verify-relevant-arguments-only.md` - Only verify relevant mock arguments
 - `./rules/general/existing-test-awareness.md` - Check for existing tests, avoid duplicates
 - `./rules/general/code-context-analysis.md` - Read dependencies before analyzing
+- `./rules/general/assert-values-not-shapes.md` - Assert produced values, not containers or keys
+- `./rules/general/assert-every-field-the-code-writes.md` - Assert every field the code under test assigns
+- `./rules/general/choose-inputs-at-the-boundary.md` - Pick inputs adjacent to the limit the code checks
+- `./rules/general/match-the-assertion-to-the-test-name.md` - Assert what distinguishes the named cause
