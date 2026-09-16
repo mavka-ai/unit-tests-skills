@@ -36,3 +36,6 @@ mvnw*
 .mvn/
 ### Runtime logs ###
 logs/
+
+### Handoff notes ###
+.handoffs/
