@@ -14,11 +14,14 @@ Apply strict INCLUDE/EXCLUDE criteria to generate meaningful test cases that cov
 - Each unique return value or exception the method can produce
 - For HTTP methods: separate cases for status 400, 401, 403 (never merge these)
 - Use concrete status codes only
-- **Validation constraints**: Generate NEGATIVE test cases for each validation annotation (invalid input that should fail validation)
+- **Validation constraints**: Generate a NEGATIVE test case for each constraint declaration on each field (invalid input that should fail validation)
 - **Custom validators**: Generate test cases that trigger validation failure
 
 ### EXCLUDE:
-- Duplicate scenarios with same observable result
+- Duplicate scenarios — two cases that cannot diverge. Judge by whether what each case pins can
+  change independently, not by whether today's results look alike: two fields that each declare
+  their own maximum length are not duplicates, because either limit can be edited without the
+  other and only its own case will then go red
 - Collection size variations (1, 2, 3 elements) unless code has EXPLICIT size-dependent logic
 - Speculative cases (exotic Unicode, massive payload) unless code explicitly handles them
 - Null arguments unless parameter is `@Nullable` or `Optional`
@@ -74,5 +77,11 @@ Before adding each test case, ask:
 1. Does it trigger a DIFFERENT code branch? If no -> skip
 2. Does it produce a DIFFERENT observable outcome? If no -> skip
 3. Does the code EXPLICITLY check this condition? If no -> skip
+
+**Count declarations, not branches.** One negative case per declared constraint, on every
+field that declares one. Each declaration can be edited on its own, so each needs its own case
+to go red when it changes. The three questions above do not reach these cases: a framework
+validates declared constraints before the code under test runs and funnels every failure into
+one shared path, so all three answer "skip" for every field.
 
 **FORBIDDEN:** Using "2xx", "4xx", "5xx" instead of concrete status codes (200, 400, 401, 403, 500).

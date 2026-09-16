@@ -94,17 +94,23 @@ public void sendEmail_allFieldsAreCorrect() {
 
 ### Combining with ArgumentCaptor
 
-For complex objects, capture and verify only relevant fields:
+This rule stops at the boundary of the captured object. Which *arguments* of the call to
+pin is decided here; which *fields inside* a captured object to assert is decided by
+`assert-every-field-the-code-writes.md`, and the answer there is every field the code
+under test assigns. An object the code built is the behavior under test, so there is no
+irrelevant field among its written ones — leaving one out is how a test keeps passing
+while that field goes wrong.
 
 ```java
 @Test
-public void createOrder_setsCorrectProductId() {
+public void createOrder_validRequest_savesOrderWithRequestedProductAndQuantity() {
     var captor = ArgumentCaptor.forClass(Order.class);
 
     orderService.createOrder(new OrderRequest("product-123", 5));
 
     verify(repository).save(captor.capture());
-    // Only verify the field relevant to this test
-    assertThat(captor.getValue().getProductId()).isEqualTo("product-123");
+    Order actualOrder = captor.getValue();
+    assertThat(actualOrder.getProductId()).isEqualTo("product-123");
+    assertThat(actualOrder.getQuantity()).isEqualTo(5);
 }
 ```
