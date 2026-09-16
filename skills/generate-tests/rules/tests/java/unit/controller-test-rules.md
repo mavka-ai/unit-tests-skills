@@ -107,10 +107,13 @@ The code is the constraint's simple name — `NotBlank`, `Size`, `Pattern`, `Ema
 the code passed to `result.rejectValue(field, code, message)` for a rejection the
 handler makes itself.
 
+The same requirement applies to a JSON API, where the discriminator lives in the error
+body rather than in the model. The exact path depends on the project's
+`@ControllerAdvice` — read it, or an existing test, before assuming this shape.
 
 ```java
 @Test
-void createUser_blankName_returns400() throws Exception {
+void createUser_blankName_returns400WithNotBlankCode() throws Exception {
     String requestJson = """
             {
                 "name": "",
@@ -121,11 +124,13 @@ void createUser_blankName_returns400() throws Exception {
     mockMvc.perform(post("/api/users")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors[0].field").value("name"))
+            .andExpect(jsonPath("$.errors[0].code").value("NotBlank"));
 }
 
 @Test
-void createUser_invalidEmail_returns400() throws Exception {
+void createUser_invalidEmail_returns400WithEmailCode() throws Exception {
     String requestJson = """
             {
                 "name": "John",
@@ -136,7 +141,9 @@ void createUser_invalidEmail_returns400() throws Exception {
     mockMvc.perform(post("/api/users")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors[0].field").value("email"))
+            .andExpect(jsonPath("$.errors[0].code").value("Email"));
 }
 ```
 
