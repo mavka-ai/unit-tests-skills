@@ -89,50 +89,11 @@ Splitting them out is not dropping them: `assert-every-field-the-code-writes.md`
 every assigned field to be asserted by some test, and names the check that catches a field
 no test covers.
 
-### One Trigger Per Test, Even When the Outcome Is Shared
-
-The section above allows many assertions about **one** behaviour. It does not allow
-many **causes** in one test. Validation is where this goes wrong most often: several
-constraints share a single outcome — "the form comes back with errors" — which makes
-merging them look like one scenario.
-
-**Incorrect:**
-
-```java
-@Test
-void createUser_blankNamesAndCity_returnsFormWithFieldErrors() throws Exception {
-    mockMvc.perform(post("/users/new").param("firstName", "")
-                    .param("lastName", "")
-                    .param("city", ""))
-            .andExpect(model().attributeHasFieldErrors("user", "firstName", "lastName", "city"));
-}
-```
-
-Three constraints are tripped at once. When this goes red it does not say which one
-regressed — and if two of the three stop rejecting, it still passes on the third.
-
-**Correct** — one constraint per test, every other field valid:
-
-```java
-@Test
-void createUser_blankFirstName_returnsFormWithFirstNameError() throws Exception {
-    mockMvc.perform(post("/users/new").param("firstName", "")
-                    .param("lastName", "Smith")
-                    .param("city", "London")
-                    .param("phone", "5550123456"))
-            .andExpect(model().attributeHasFieldErrors("user", "firstName"));
-}
-```
-
-...and one more each for `lastName` and `city`.
-
-Keep every field except the one under test valid, so the only reason the request can
-be rejected is the constraint being tested. The check: if you could delete one of the
-inputs and still have a failing case for a different reason, those are separate
-scenarios.
-
-A test name that needs "and" to describe its input is the same signal as the "and" in
-the list below.
+The same criterion applies to causes, not just assertions: widening the name
+(`..._returnsFormWithFieldErrors`) does not make three tripped constraints one behaviour.
+One constraint per test — every other field valid, so rejection can have only one reason.
+Per-constraint coverage is required by `test-case-generation-strategy.md`; this is the
+setup it needs.
 
 ### Signs Your Test Is Not Focused
 
