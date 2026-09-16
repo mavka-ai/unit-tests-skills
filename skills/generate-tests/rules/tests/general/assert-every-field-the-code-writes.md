@@ -7,9 +7,9 @@ tags: tests, assertions, argument-captor, completeness, oracle-strength
 
 ## Assert Every Field the Code Writes
 
-When a test captures an object that the code under test built or mutated, the set of
-fields to assert is decided by the production code, not by judgment: **assert every field
-the code assigns on the path under test.**
+When the code under test builds or mutates an object, the set of fields that must be
+asserted is decided by the production code, not by judgment: **every field the code assigns
+on the path under test is asserted by some test that covers that path.**
 
 This is the gap that looks most rigorous from the outside. The test has a captor, named
 field assertions and no wildcard matchers — it looks exhaustive. It is exhaustive only of
@@ -23,12 +23,42 @@ Derive the list from the code instead:
 
 1. Read the method under test. List every field it assigns on the path being tested —
    constructor arguments, setters, builder calls, mapper output.
-2. Every field on that list gets an assertion.
-3. Fields **not** on that list get none. Fields left at their default, populated by the
+2. Split that list in two. A field whose value follows from the input by **identity** — the
+   code copies it across and decides nothing — is asserted together with the other identity
+   fields, in the test named for that input. A field whose value the code **decides** — a
+   default, a clock, a generator, a transformation such as `request.getIban().substring(0, 8)`
+   — is a behavior of its own and gets its own test, named for that decision.
+3. Every field on the list is asserted by one of those tests. Which test asserts it is a
+   naming question; whether it is asserted at all is not.
+4. Fields **not** on the list get none. Fields left at their default, populated by the
    framework, or written by code outside this method are out of scope; asserting them
    turns the test into a change-detector that breaks on unrelated edits.
 
 The list ends where the method's assignments end.
+
+For the method below the list is four fields, and the split gives two tests:
+
+```java
+public void transfer(TransferRequest request) {
+    Transfer transfer = new Transfer();
+    transfer.setRecipientIban(request.getIban());    // identity
+    transfer.setAmount(request.getAmount());         // identity
+    transfer.setCurrency(request.getCurrency());     // identity
+    transfer.setCreatedAt(Instant.now(clock));       // decision
+    transferRepository.save(transfer);
+}
+```
+
+| Field | Value comes from | Test that asserts it |
+|---|---|---|
+| `recipientIban`, `amount`, `currency` | the request, unchanged — identity | `transfer_validRequest_persistsTransferWithRequestedCurrency` |
+| `createdAt` | the injected `Clock` — a decision | `transfer_validRequest_stampsCreatedAtFromClock` |
+
+### The Check
+
+For each field on the list, name the test that asserts it. **If you cannot name one, that is
+the gap** — whether the tests are split or not. Giving a field its own test is not dropping
+it; leaving it with no test anywhere is.
 
 ### Problem: The Field Nobody Asserted
 
@@ -77,17 +107,28 @@ void transfer_validRequest_persistsTransferWithRequestedCurrency() {
 
 ### Fields Whose Value Is Not Fixed
 
-A field assigned from a clock, a random source or a generator still gets an assertion — it
-just cannot be an equality check against a literal. Assert the property the code is
-responsible for, and fix the source so there is one:
+A field assigned from a clock, a random source or a generator is a decision, so it gets its
+own test — and the assertion in it is still an equality check, because fixing the source is
+what makes one possible:
 
 ```java
-// The service stamps createdAt from an injected Clock — fix the clock, assert the value
-assertThat(actualTransfer.getCreatedAt()).isEqualTo(Instant.parse("2026-01-01T00:00:00Z"));
+@Test
+void transfer_validRequest_stampsCreatedAtFromClock() {
+    // Given — the Clock injected into the service is fixed at 2026-01-01T00:00:00Z
+    var captor = ArgumentCaptor.forClass(Transfer.class);
+
+    // When
+    transferService.transfer(newRequest());
+
+    // Then
+    verify(transferRepository).save(captor.capture());
+    assertThat(captor.getValue().getCreatedAt()).isEqualTo(Instant.parse("2026-01-01T00:00:00Z"));
+}
 ```
 
-Dropping a field because its value is awkward to pin is how the assignment goes unchecked.
-Injecting a fixed clock costs less than the gap it closes.
+Leaving the field with no assertion anywhere, because its value is awkward to pin, is how the
+assignment goes unchecked. `isNotNull()` on a generated value is that same omission with a
+line of code in front of it. Injecting a fixed clock costs less than the gap it closes.
 
 ### Do Not Substitute Whole-Object Equality
 
@@ -107,8 +148,9 @@ The two rules act on different things and do not conflict:
 - `verify-relevant-arguments-only` governs the **arguments of the call** — which parameters
   to pin with `eq(...)` and which to leave as `any(...)`, because they belong to a behavior
   a different test owns.
-- This rule governs the **fields inside an object the code under test built**. Those fields
-  are the behavior under test, so there is no irrelevant one among them.
+- This rule governs the **fields inside an object the code under test built**. None of them
+  may go unasserted; which test asserts which is decided by the identity/decision split
+  above.
 
 ### When No Assertion Can Fail
 

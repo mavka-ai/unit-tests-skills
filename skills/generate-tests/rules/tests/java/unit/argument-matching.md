@@ -14,7 +14,8 @@ Capture and verify actual arguments instead of using `any()` matchers for DTOs a
 - In `verify(...)`, capture DTO/model arguments with `ArgumentCaptor` and assert their
   fields — `any(...)` in that position asserts nothing about the data. Which fields is
   not a judgment call: `general/assert-every-field-the-code-writes.md` sets the list to
-  every field the code under test assigns on this path
+  every field the code under test assigns on this path, and its identity/decision split
+  says which test asserts which
 - In `when(...)`, `any(...)` is the right choice: a stub decides what the mock returns,
   it makes no assertion. See "Stubbing and Verification Are Different Positions" below
 
@@ -139,5 +140,7 @@ private ArgumentCaptor<List<Order>> orderListCaptor;
 // Verify multiple calls
 verify(repository, times(2)).save(captor.capture());
 List<Order> allOrders = captor.getAllValues();
-assertThat(allOrders).hasSize(2);
+assertThat(allOrders)
+        .extracting(Order::getProductId)
+        .containsExactly("product-123", "product-456");
 ```
