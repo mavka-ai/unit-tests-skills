@@ -167,10 +167,6 @@ Result: Complete test file delivered with 7 passing tests.
 - `general/prefer-public-apis.md` - Test public APIs over private methods
 - `general/existing-test-awareness.md` - Check for existing tests, match project conventions
 - `general/code-context-analysis.md` - Read dependencies before writing tests
-- `general/assert-values-not-shapes.md` - Assert produced values, not containers or keys
-- `general/assert-every-field-the-code-writes.md` - Assert every field the code under test assigns
-- `general/choose-inputs-at-the-boundary.md` - Pick inputs adjacent to the limit the code checks
-- `general/match-the-assertion-to-the-test-name.md` - Assert what distinguishes the named cause
 
 ### Java Unit Tests
 - `java/unit/java-test-template.md` - Basic template, FORBIDDEN annotations
