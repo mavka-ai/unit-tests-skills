@@ -7,7 +7,7 @@ tags: tests, assertions, oracle-strength, tautology
 
 ## Assert the Value, Not the Shape of the Answer
 
-An assertion earns its place only if some input would make it fail. Assertions on the
+An assertion earns its place only if a wrong answer would make it fail. Assertions on the
 **shape** of a result — that it is non-null, that it has the expected type, that a
 collection is not empty, that a message carries the expected key — hold for every
 successful run, whatever the operation actually computed.
@@ -17,9 +17,9 @@ resulting status, the elements in the collection.
 
 ### The Check
 
-Before accepting an assertion, ask: **would it still hold if this test's input were a
-different valid input?** If yes, it is asserting the shape, and the values that are the
-point of the operation are unchecked.
+Before accepting an assertion, ask: **if the code computed a different answer for this
+input, would this assertion fail?** If not, it is asserting the shape, and the values that
+are the point of the operation are unchecked.
 
 ### Problem: True by Construction
 
@@ -38,8 +38,9 @@ void transfer_validRequest_returnsConfirmation() {
     assertThat(actualResponse).isNotNull();
     assertThat(actualResponse.getMessageKey()).isEqualTo("transfer.confirmation");
 }
-// Every successful transfer returns that key. Change the amount to 4000.00 and the
-// recipient to another IBAN and the test still passes — it cannot tell the two apart.
+// Every successful transfer returns that key. Let the service send 4000.00 to a
+// different IBAN and the test still passes — the assertion cannot tell a correct
+// answer from a wrong one.
 ```
 
 **Correct:**
@@ -83,13 +84,14 @@ assertThat(actualTransfers)
         .containsExactly("DE89370400440532013000", "FR1420041010050500013M02606");
 ```
 
-### When a Shape Assertion Is the Right One
+### When a Shape Assertion Passes the Check
 
-Two cases, both narrow:
+Two cases, both narrow, and neither is an exception to the check above — both satisfy it:
 
 1. **The shape is the behavior.** An endpoint whose contract is "returns 204 with an empty
-   body" is tested by asserting exactly that. An operation specified to return an empty
-   collection for an unknown account is tested with `isEmpty()`.
+   body" fails the moment the code answers with anything else, so asserting exactly that is
+   asserting the value. The same holds for an operation specified to return an empty
+   collection for an unknown account, tested with `isEmpty()`.
 2. **As a precondition, alongside a value assertion.** A null check that guards the
    navigation to the value you actually assert is fine. On its own it is not an assertion.
 
