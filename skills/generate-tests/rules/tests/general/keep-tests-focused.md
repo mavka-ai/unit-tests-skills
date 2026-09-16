@@ -66,20 +66,29 @@ void withdraw_withinOverdraftLimit_succeeds() {
 
 ### When Multiple Assertions Are OK
 
-Multiple assertions are fine when verifying **one behavior** with multiple properties:
+Multiple assertions are fine when **none of them depends on a decision the code makes**.
+Fields the code copies across from the input by identity are one claim, not several
+behaviours, so they belong in one test. A field whose value the code decides — a default,
+a clock, a generator, a transformation — is a behaviour of its own, and
+`assert-every-field-the-code-writes.md` says where it goes.
 
 ```java
 @Test
-void createUser_validInput_returnsCompleteUser() {
-    User actualUser = userService.create("john@test.com", "John");
+void create_validInput_returnsUserWithSubmittedIdentity() {
+    User actualUser = userService.create(newUserRequest("john@test.com", "John", "Smith"));
 
-    // All assertions verify the same behavior: user creation
-    assertThat(actualUser.getId()).isNotNull();
+    // Three fields, one claim: the submitted identity is carried across unchanged
     assertThat(actualUser.getEmail()).isEqualTo("john@test.com");
-    assertThat(actualUser.getName()).isEqualTo("John");
-    assertThat(actualUser.getCreatedAt()).isNotNull();
+    assertThat(actualUser.getFirstName()).isEqualTo("John");
+    assertThat(actualUser.getLastName()).isEqualTo("Smith");
 }
 ```
+
+The service also assigns `status` and `createdAt`. Each is a decision, so each is its own
+test — `create_validInput_setsStatusActive`, `create_validInput_stampsCreatedAtFromClock`.
+Splitting them out is not dropping them: `assert-every-field-the-code-writes.md` requires
+every assigned field to be asserted by some test, and names the check that catches a field
+no test covers.
 
 ### One Trigger Per Test, Even When the Outcome Is Shared
 
