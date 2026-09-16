@@ -21,8 +21,12 @@ pin where.
 
 ### The Stopping Condition
 
-**One pair per comparison in the code under test** — not a sweep of values, and not a pair
-per field.
+**One pair per comparison in the code under test** — not a sweep of values.
+
+A *comparison* is one constant checked against one value. Two fields that each declare their
+own maximum length are **two** comparisons and need **two** pairs: a limit that is repeated
+textually is not a limit that is checked once. What "one pair" rules out is a third and fourth
+rejecting value for the *same* comparison — never the second field's boundary.
 
 - For each comparison, two inputs: the boundary value itself and one step past it.
 - For the values inside a partition, one representative is enough. Three more valid amounts
@@ -85,17 +89,93 @@ The pair fails if the limit moves in either direction. Either test alone does no
 ### Where to Look for Comparisons
 
 - Relational operators on numbers, lengths, sizes and dates: `>`, `>=`, `<`, `<=`
-- Declarative constraints the framework enforces: `@Size`, `@Min`, `@Max`, `@Length`,
-  `@Positive`, `@Past`, `@Future`
+- Declarative constraints a framework enforces on a field: length, range, sign and date bounds
+  (`@Size`, `@Min`, `@Max`, `@Length`, `@Positive`, `@Past`, `@Future` in Java)
 - Explicit size or emptiness branches on a collection
 - String length and format limits applied before persistence
 
 A two-sided constraint has two boundaries. `@Size(min = 2, max = 30)` gives four inputs —
-2 accepted, 1 rejected, 30 accepted, 31 rejected — and no values in between.
+2 accepted, 1 rejected, 30 accepted, 31 rejected — and no values in between. A constraint
+repeated on *n* fields gives *n* independent boundaries: each declaration can be edited on its
+own, so each needs its own pair.
+
+### Problem: One Field Covered, Its Twin Left Unpinned
+
+An entity declares the same length limit on two fields:
+
+```java
+@Size(max = 30) @NotBlank private String firstName;
+@Size(max = 30) @NotBlank private String lastName;
+```
+
+**Incorrect:**
+
+```java
+@Test
+void register_lastNameAtMaxLength_isAccepted() {
+    // Given
+    var request = new RegistrationRequest("George", "Abcdefghijklmnopqrstuvwxyzabcd"); // 30 characters
+
+    // When
+    var actualResult = registrationService.register(request);
+
+    // Then
+    assertThat(actualResult.getStatus()).isEqualTo(RegistrationStatus.CREATED);
+}
+
+@Test
+void register_lastNameOverMaxLength_isRejected() {
+    // Given
+    var request = new RegistrationRequest("George", "Abcdefghijklmnopqrstuvwxyzabcde"); // 31 characters
+
+    // When / Then
+    assertThatThrownBy(() -> registrationService.register(request))
+            .isInstanceOf(ConstraintViolationException.class);
+}
+// firstName declares its own limit and nothing pins it: raise that one to 50
+// and both tests above still pass.
+```
+
+**Correct:** the same pair again, on `firstName`.
+
+```java
+@Test
+void register_firstNameAtMaxLength_isAccepted() {
+    // Given
+    var request = new RegistrationRequest("Abcdefghijklmnopqrstuvwxyzabcd", "Franklin"); // 30 characters
+
+    // When
+    var actualResult = registrationService.register(request);
+
+    // Then
+    assertThat(actualResult.getStatus()).isEqualTo(RegistrationStatus.CREATED);
+}
+
+@Test
+void register_firstNameOverMaxLength_isRejected() {
+    // Given
+    var request = new RegistrationRequest("Abcdefghijklmnopqrstuvwxyzabcde", "Franklin"); // 31 characters
+
+    // When / Then
+    assertThatThrownBy(() -> registrationService.register(request))
+            .isInstanceOf(ConstraintViolationException.class);
+}
+```
+
+Four cases, not two. The two fields are not duplicate scenarios: they are two constraints that
+happen to share a number, and either can change without the other.
+
+### This Rule Chooses Values, Not Cases
+
+How many cases to write is decided by `test-case-generation-strategy.md`, whose INCLUDE
+criteria call for a negative case per declared constraint, on every field that declares one.
+This rule starts after that decision and fixes only the *input value* inside a case that
+already belongs. "One pair per comparison" is never a reason to drop a case the strategy asked
+for: it bounds how many values one case needs, not how many cases exist.
 
 ### Related
 
-- `test-case-generation-strategy.md` — whether a case belongs at all; this rule decides the
-  input once it does.
+- `test-case-generation-strategy.md` — whether a case belongs at all, including one negative
+  case per declared constraint per field; this rule decides the input once it does.
 - `assert-values-not-shapes.md` — the complementary failure, where the input is right and
   the assertion is idle.
