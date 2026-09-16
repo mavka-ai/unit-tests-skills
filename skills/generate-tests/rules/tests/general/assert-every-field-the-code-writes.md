@@ -127,8 +127,9 @@ void transfer_validRequest_stampsCreatedAtFromClock() {
 ```
 
 Leaving the field with no assertion anywhere, because its value is awkward to pin, is how the
-assignment goes unchecked. `isNotNull()` on a generated value is that same omission with a
-line of code in front of it. Injecting a fixed clock costs less than the gap it closes.
+assignment goes unchecked; `isNotNull()` in its place is the shape assertion
+`assert-values-not-shapes.md` rules out. Injecting a fixed clock costs less than the gap it
+closes.
 
 ### Do Not Substitute Whole-Object Equality
 
@@ -141,17 +142,6 @@ It asserts the untouched fields too, so it breaks when an unrelated field is add
 delegates the comparison to `equals()`, which entities commonly define on id alone — in
 which case it asserts almost nothing. Assert the written fields by name.
 
-### Relationship to `verify-relevant-arguments-only.md`
-
-The two rules act on different things and do not conflict:
-
-- `verify-relevant-arguments-only` governs the **arguments of the call** — which parameters
-  to pin with `eq(...)` and which to leave as `any(...)`, because they belong to a behavior
-  a different test owns.
-- This rule governs the **fields inside an object the code under test built**. None of them
-  may go unasserted; which test asserts which is decided by the identity/decision split
-  above.
-
 ### When No Assertion Can Fail
 
 Enumerating the assigned fields sometimes turns up one that nothing ever reads — a field set
@@ -162,3 +152,10 @@ Do not invent an assertion for it, and do not reach into internals to manufactur
 is a finding about the production code: report it as dead code or missing wiring, and leave
 it out of the test. Filing it as a test gap produces tests that assert on implementation
 detail and fail on every refactor.
+
+### Related
+
+- `verify-relevant-arguments-only.md` — the arguments of the call, where this rule stops: that
+  rule decides `eq(...)` vs `any(...)`, this one decides the fields inside a captured object.
+- `assert-values-not-shapes.md` — the same failure one level up, on the value a method returned.
+- `keep-tests-focused.md` — how the identity/decision split above lands as separate tests.
