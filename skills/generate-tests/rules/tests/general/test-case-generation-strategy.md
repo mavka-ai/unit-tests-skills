@@ -14,8 +14,46 @@ Apply strict INCLUDE/EXCLUDE criteria to generate meaningful test cases that cov
 - Each unique return value or exception the method can produce
 - For HTTP methods: separate cases for status 400, 401, 403 (never merge these)
 - Use concrete status codes only
-- **Validation constraints**: Generate NEGATIVE test cases for each validation annotation (invalid input that should fail validation)
+- **Validation constraints**: Cover every independently failing condition and both sides of every declared boundary, ensuring at least one case in which all constraints pass
 - **Custom validators**: Generate test cases that trigger validation failure
+
+### Validation Constraint Coverage
+
+For every constraint declaration:
+
+- Generate one negative case for each independent way the constraint can fail.
+- For each configured boundary, use the nearest valid and invalid values, accounting for
+  whether the bound is inclusive and the smallest meaningful step in the input domain.
+- Keep every other constraint satisfied, including constraints on the same field, so the
+  case isolates one constraint condition.
+
+Ensure at least one positive case in which every constraint on the validated input passes.
+An existing positive boundary case can satisfy this requirement; do not add a separate case
+solely to repeat all-valid coverage.
+Do not merge validation cases merely because the framework reports the same status or
+exception type for them; each independently changeable boundary or condition must remain
+visible in the test suite.
+
+For example:
+
+```java
+@Size(min = 2, max = 10)
+String username;
+```
+
+requires these boundary cases:
+
+```text
+length 1  -> invalid
+length 2  -> valid
+length 10 -> valid
+length 11 -> invalid
+```
+
+The length-2 or length-10 case also covers the all-valid input when every other constraint
+is satisfied. No additional case is required solely for that purpose.
+
+For an exclusive integer lower bound `x > 0`, use `0` (invalid) and `1` (valid).
 
 ### EXCLUDE:
 - Redundant input variations that add no distinct behavior, condition,

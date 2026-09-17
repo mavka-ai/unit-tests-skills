@@ -221,7 +221,7 @@ skills/
 - Each distinct code branch and outcome
 - Each unique return value or exception
 - Separate cases for HTTP 400, 401, 403 (never merge)
-- Negative test cases for validation constraints
+- Each independent validation failure, nearest valid and invalid values at every boundary, and at least one all-valid input case (which may be a positive boundary case)
 - All paths through private methods (via public API)
 
 ### EXCLUDE
