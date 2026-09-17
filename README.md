@@ -221,7 +221,7 @@ skills/
 - Each distinct code branch and outcome
 - Each unique return value or exception
 - Separate cases for HTTP 400, 401, 403 (never merge)
-- Negative test cases for validation constraints
+- Each independent validation failure, both sides of every boundary, and one all-valid input case
 - All paths through private methods (via public API)
 
 ### EXCLUDE
@@ -229,7 +229,6 @@ skills/
 - Collection size variations (1, 2, 3 items) unless code has explicit size logic
 - Speculative cases (exotic Unicode, massive payloads) unless explicitly handled
 - Null arguments unless parameter is `@Nullable`
-- Multiple tests for same exception type
 
 ## Example Output
 
