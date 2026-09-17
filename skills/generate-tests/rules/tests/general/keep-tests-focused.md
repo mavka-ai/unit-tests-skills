@@ -66,9 +66,7 @@ void withdraw_withinOverdraftLimit_succeeds() {
 
 ### When Multiple Assertions Are OK
 
-Multiple assertions are fine when a failure of any one of them means the outcome named in
-the test is wrong. An assertion that could fail while the named outcome is still right is
-a separate behaviour and needs its own test.
+Multiple assertions are fine when verifying **one behavior** with multiple properties:
 
 ```java
 @Test
@@ -88,7 +86,7 @@ submitted identity is still carried across correctly, so each belongs in its own
 Splitting them out is not dropping them — a field moved to its own test is still asserted;
 a field left out of every test is not.
 
-The same criterion applies to causes, not just assertions: widening the name
+One behaviour bounds causes too, not just assertions: widening the name
 (`..._returnsFormWithFieldErrors`) does not make three tripped constraints one behaviour.
 One constraint per test — every other field valid, so rejection can have only one reason.
 Per-constraint coverage is required by `test-case-generation-strategy.md`; this is the
