@@ -225,7 +225,7 @@ skills/
 - All paths through private methods (via public API)
 
 ### EXCLUDE
-- Duplicate scenarios with same observable result
+- Redundant input variations that add no distinct behavior, condition, or boundary coverage
 - Collection size variations (1, 2, 3 items) unless code has explicit size logic
 - Speculative cases (exotic Unicode, massive payloads) unless explicitly handled
 - Null arguments unless parameter is `@Nullable`

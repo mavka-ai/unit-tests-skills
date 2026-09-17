@@ -56,7 +56,8 @@ is satisfied. No additional case is required solely for that purpose.
 For an exclusive integer lower bound `x > 0`, use `0` (invalid) and `1` (valid).
 
 ### EXCLUDE:
-- Duplicate scenarios with same observable result
+- Redundant input variations that add no distinct behavior, condition,
+  or boundary coverage — see Decision Strategy
 - Collection size variations (1, 2, 3 elements) unless code has EXPLICIT size-dependent logic
 - Speculative cases (exotic Unicode, massive payload) unless code explicitly handles them
 - Null arguments unless parameter is `@Nullable` or `Optional`
@@ -107,13 +108,24 @@ When a method calls private/protected methods, cover ALL their execution paths i
 
 ### Decision Strategy
 
-Before adding each test case, ask:
-1. Does it trigger a DIFFERENT code branch? If no -> skip
-2. Does it produce a DIFFERENT observable outcome? If no -> skip
-3. Does the code EXPLICITLY check this condition? If no -> skip
+Include a test case when it covers a distinct behavior, an independent
+condition, or a boundary required by the contract or implemented in the code.
 
-For validation constraints, apply **Validation Constraint Coverage** instead of these
-three questions. Framework validation commonly routes distinct constraint failures through
-the same code path and observable outcome.
+Two cases are not duplicates merely because they produce the same return
+value, HTTP status, or exception type. Keep separate cases when each checks
+a different condition that can fail independently.
+
+Exclude additional input variations within the same equivalence partition
+when they exercise the same condition and add no distinct behavior or
+boundary coverage.
+
+For example:
+
+- A deleted account and an expired account both reject login with
+  `IllegalStateException`. Keep both cases: either rejection condition
+  can regress independently.
+- Accounts expired by five and ten days exercise the same condition.
+  One representative is enough unless the contract or code distinguishes
+  those durations.
 
 **FORBIDDEN:** Using "2xx", "4xx", "5xx" instead of concrete status codes (200, 400, 401, 403, 500).
