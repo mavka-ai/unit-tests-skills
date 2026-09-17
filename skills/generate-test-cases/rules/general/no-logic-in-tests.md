@@ -74,7 +74,7 @@ assertThat(users).extracting(User::isActive).containsOnly(true);
 
 // No conditionals - test specific scenarios
 assertThat(response.isSuccessful()).isTrue();
-assertThat(response.getBody()).isNotNull();
+assertThat(response.getBody().getName()).isEqualTo("John");
 
 // Literal expected values
 assertThat(result).isEqualTo("Hello, John!");
