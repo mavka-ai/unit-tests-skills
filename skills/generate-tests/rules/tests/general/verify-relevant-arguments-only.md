@@ -94,17 +94,21 @@ public void sendEmail_allFieldsAreCorrect() {
 
 ### Combining with ArgumentCaptor
 
-For complex objects, capture and verify only relevant fields:
+This rule stops at the boundary of the captured object. Which *arguments* of the call to
+pin is decided here; which *fields inside* a captured object to assert is decided by
+`keep-tests-focused.md` — assert together the fields whose failure means the outcome in
+the test's name is wrong, and give a field that could be wrong on its own its own test.
 
 ```java
 @Test
-public void createOrder_setsCorrectProductId() {
+public void createOrder_validRequest_savesOrderWithRequestedProductAndQuantity() {
     var captor = ArgumentCaptor.forClass(Order.class);
 
     orderService.createOrder(new OrderRequest("product-123", 5));
 
     verify(repository).save(captor.capture());
-    // Only verify the field relevant to this test
-    assertThat(captor.getValue().getProductId()).isEqualTo("product-123");
+    Order actualOrder = captor.getValue();
+    assertThat(actualOrder.getProductId()).isEqualTo("product-123");
+    assertThat(actualOrder.getQuantity()).isEqualTo(5);
 }
 ```

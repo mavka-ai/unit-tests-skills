@@ -221,15 +221,14 @@ skills/
 - Each distinct code branch and outcome
 - Each unique return value or exception
 - Separate cases for HTTP 400, 401, 403 (never merge)
-- Negative test cases for validation constraints
+- Each independent validation failure, nearest valid and invalid values at every boundary, and at least one all-valid input case (which may be a positive boundary case)
 - All paths through private methods (via public API)
 
 ### EXCLUDE
-- Duplicate scenarios with same observable result
+- Redundant input variations that add no distinct behavior, condition, or boundary coverage
 - Collection size variations (1, 2, 3 items) unless code has explicit size logic
 - Speculative cases (exotic Unicode, massive payloads) unless explicitly handled
 - Null arguments unless parameter is `@Nullable`
-- Multiple tests for same exception type
 
 ## Example Output
 
