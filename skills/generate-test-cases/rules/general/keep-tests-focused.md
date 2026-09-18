@@ -70,61 +70,27 @@ Multiple assertions are fine when verifying **one behavior** with multiple prope
 
 ```java
 @Test
-void createUser_validInput_returnsCompleteUser() {
-    User actualUser = userService.create("john@test.com", "John");
+void create_validInput_returnsUserWithSubmittedIdentity() {
+    User actualUser = userService.create(newUserRequest("john@test.com", "John", "Smith"));
 
-    // All assertions verify the same behavior: user creation
-    assertThat(actualUser.getId()).isNotNull();
+    // Drop any one of these and the submitted identity is no longer checked
     assertThat(actualUser.getEmail()).isEqualTo("john@test.com");
-    assertThat(actualUser.getName()).isEqualTo("John");
-    assertThat(actualUser.getCreatedAt()).isNotNull();
+    assertThat(actualUser.getFirstName()).isEqualTo("John");
+    assertThat(actualUser.getLastName()).isEqualTo("Smith");
 }
 ```
 
-### One Trigger Per Test, Even When the Outcome Is Shared
+The service also assigns `status` and `createdAt`. Either could be wrong while the
+submitted identity is still carried across correctly, so each belongs in its own test —
+`create_validInput_setsStatusActive`, `create_validInput_stampsCreatedAtFromClock`.
+Splitting them out is not dropping them — a field moved to its own test is still asserted;
+a field left out of every test is not.
 
-The section above allows many assertions about **one** behaviour. It does not allow
-many **causes** in one test. Validation is where this goes wrong most often: several
-constraints share a single outcome — "the form comes back with errors" — which makes
-merging them look like one scenario.
-
-**Incorrect:**
-
-```java
-@Test
-void createUser_blankNamesAndCity_returnsFormWithFieldErrors() throws Exception {
-    mockMvc.perform(post("/users/new").param("firstName", "")
-                    .param("lastName", "")
-                    .param("city", ""))
-            .andExpect(model().attributeHasFieldErrors("user", "firstName", "lastName", "city"));
-}
-```
-
-Three constraints are tripped at once. When this goes red it does not say which one
-regressed — and if two of the three stop rejecting, it still passes on the third.
-
-**Correct** — one constraint per test, every other field valid:
-
-```java
-@Test
-void createUser_blankFirstName_returnsFormWithFirstNameError() throws Exception {
-    mockMvc.perform(post("/users/new").param("firstName", "")
-                    .param("lastName", "Smith")
-                    .param("city", "London")
-                    .param("phone", "5550123456"))
-            .andExpect(model().attributeHasFieldErrors("user", "firstName"));
-}
-```
-
-...and one more each for `lastName` and `city`.
-
-Keep every field except the one under test valid, so the only reason the request can
-be rejected is the constraint being tested. The check: if you could delete one of the
-inputs and still have a failing case for a different reason, those are separate
-scenarios.
-
-A test name that needs "and" to describe its input is the same signal as the "and" in
-the list below.
+One behaviour bounds causes too, not just assertions: widening the name
+(`..._returnsFormWithFieldErrors`) does not make three tripped constraints one behaviour.
+One constraint per test — every other field valid, so rejection can have only one reason.
+Per-constraint coverage is required by `test-case-generation-strategy.md`; this is the
+setup it needs.
 
 ### Signs Your Test Is Not Focused
 
