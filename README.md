@@ -382,6 +382,6 @@ using them in your own product or fork's name is not. See
 
 ## Built by Mavka AI
 
-Unit Test Skills is built by [Mavka AI](https://mavka.ai/), a digital engineering company that helps growing tech businesses remove architectural debt, modernize systems, and put AI to work in everyday engineering.
+Unit Test Skills is built by [Mavka AI](https://mavka.ai/), where we create the best AI tools and skills for developers. We’re a digital engineering company that helps growing tech businesses remove architectural debt, modernize systems, and put AI to work in everyday engineering.
 
 **[Work with Mavka AI →](https://mavka.ai/)**
