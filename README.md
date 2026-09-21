@@ -1,15 +1,31 @@
-<div align="center">
-<br/>
+<p align="center">
+  <a href="https://mavka.ai/">
+    <img src="assets/mavka-ai-logo.svg" alt="Mavka AI" width="220">
+  </a>
+</p>
 
-<a href="https://mavka.ai/">
-  <img src="assets/mavka-ai-logo.svg" alt="Mavka AI" width="320" />
-</a>
+<h1 align="center">Unit Test Skills by Mavka</h1>
 
-### AI agent skills for generating high-quality unit tests
+<p align="center">
+  <strong>Don’t just ask your AI agent to write tests. Give it a testing process.</strong>
+</p>
 
-[Website](https://mavka.ai/)
+<p align="center">
+  These skills make your agent plan coverage first, generate focused Java unit tests,<br>
+  compile them, and run them before it reports done.
+</p>
 
-</div>
+<p align="center">
+  <strong>Plan → Generate → Compile → Run</strong>
+</p>
+
+<p align="center">
+  <code>Java</code> · <code>JUnit 5</code> · <code>Mockito</code> · <code>AssertJ</code>
+</p>
+
+<p align="center">
+  <a href="#installation"><strong>Install the skills ↓</strong></a>
+</p>
 
 
 [Mavka AI](https://mavka.ai/) is the digital engineering company behind these skills. We help growing tech businesses eliminate architectural debt and accelerate development with AI — through codebase and infrastructure audits, technical debt remediation and system modernization, and knowledge transfer to client teams — so engineering stops being your bottleneck.
