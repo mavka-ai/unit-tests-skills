@@ -27,11 +27,6 @@
   <a href="#installation"><strong>Install the skills ↓</strong></a>
 </p>
 
-
-[Mavka AI](https://mavka.ai/) is the digital engineering company behind these skills. We help growing tech businesses eliminate architectural debt and accelerate development with AI — through codebase and infrastructure audits, technical debt remediation and system modernization, and knowledge transfer to client teams — so engineering stops being your bottleneck.
-
-> Curious how much technical debt is quietly slowing your team down? Find out at [mavka.ai](https://mavka.ai/).
-
 ## Installation
 
 **unit-tests-skills** is a collection of AI agent skills for generating high-quality unit tests. These skills encode battle-tested testing principles that work across any programming language.
@@ -384,3 +379,7 @@ using them in your own product or fork's name is not. See
 
 ## Guide to Building Skills for Claude
 [The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
+
+[Mavka AI](https://mavka.ai/) is the digital engineering company behind these skills. We help growing tech businesses eliminate architectural debt and accelerate development with AI — through codebase and infrastructure audits, technical debt remediation and system modernization, and knowledge transfer to client teams — so engineering stops being your bottleneck.
+
+> Curious how much technical debt is quietly slowing your team down? Find out at [mavka.ai](https://mavka.ai/).
