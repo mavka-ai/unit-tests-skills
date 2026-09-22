@@ -24,6 +24,19 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/mavka-ai/unit-tests-skills/stargazers"><img src="https://img.shields.io/github/stars/mavka-ai/unit-tests-skills?style=flat-square&amp;color=111111&amp;label=stars" alt="GitHub stars"></a>
+  <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/plugin-2026.9.15-111111?style=flat-square" alt="Plugin version 2026.9.15"></a>
+  <a href="#testing-principles"><img src="https://img.shields.io/badge/Java-JUnit%205-111111?style=flat-square" alt="Java and JUnit 5"></a>
+  <a href="#installation"><img src="https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Codex-111111?style=flat-square" alt="Works with Claude Code and Codex"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/mavka-ai/unit-tests-skills?style=flat-square&amp;color=111111&amp;label=license" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <strong>~42% → ~83–92% mutation score · 100% branch coverage</strong><br>
+  <sub>One pinned Spring Petclinic target · 12 injected defects · Claude Code 2.1.276 / OPUS-5 · Codex 0.155.1 / gpt-5.6-sol</sub>
+</p>
+
+<p align="center">
   <a href="#installation"><strong>Install the skills ↓</strong></a>
 </p>
 
