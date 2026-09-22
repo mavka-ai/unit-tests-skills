@@ -36,6 +36,9 @@ pinned Spring Petclinic target, first without the skill and then with it. We ran
 all four suites against the original code and the same 12 deliberately
 introduced defects.
 
+**Engines:** Claude Code `2.1.276` with `OPUS-5` · Codex `0.155.1` with
+`gpt-5.6-sol`
+
 | Engine | Without skill | With skill |
 |--------|--------------:|-----------:|
 | Claude | 5 / 12 killed · 7 survived | 10 / 12 killed · 2 survived |
@@ -355,8 +358,11 @@ marks are not licensed with the code. Referring to the project by name is fine;
 using them in your own product or fork's name is not. See
 [TRADEMARK.md](TRADEMARK.md) for the full policy.
 
-## Guide to Building Skills for Claude
-[The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
+## Documentation
+
+- [Google's unit test best practices](docs/google-unit-test-best-practices.md) —
+  source review and implementation status for the rules in this repository.
+- [The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
 
 ## Built by Mavka AI
 
