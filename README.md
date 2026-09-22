@@ -52,10 +52,12 @@ introduced defects.
 **Engines:** Claude Code `2.1.276` with `OPUS-5` · Codex `0.155.1` with
 `gpt-5.6-sol`
 
-| Engine | Without skill | With skill |
-|--------|--------------:|-----------:|
-| Claude | 5 / 12 killed · 7 survived | 10 / 12 killed · 2 survived |
-| Codex | 5 / 12 killed · 7 survived | 11 / 12 killed · 1 survived |
+| Engine | Setup | Build | Tests | Mutants killed | Survived |
+|--------|-------|-------|------:|----------------:|---------:|
+| Claude | Without skill | PASS | 20 | 5 / 12 | 7 |
+| Claude | With skill | PASS | 35 | 10 / 12 | 2 |
+| Codex | Without skill | PASS | 15 | 5 / 12 | 7 |
+| Codex | With skill | PASS | 26 | 11 / 12 | 1 |
 
 All four suites built successfully and reported 100% branch coverage. Mutation
 testing revealed the difference: the suites generated with the skill detected
