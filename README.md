@@ -27,55 +27,43 @@
   <a href="#installation"><strong>Install the skills ↓</strong></a>
 </p>
 
-## See the difference: without skill vs with skill
+## See the difference
 
-**Same green build. Same 100% branch coverage. Very different defect
-detection.**
+**Same green build. Same 100% branch coverage. More defects detected.**
 
 In one controlled benchmark, Claude and Codex each generated tests for the same
 pinned Spring Petclinic target, first without the skill and then with it. We ran
 all four suites against the original code and the same 12 deliberately
 introduced defects.
 
-### Without skill
+| Engine | Without skill | With skill |
+|--------|--------------:|-----------:|
+| Claude | 5 / 12 killed · 7 survived | 10 / 12 killed · 2 survived |
+| Codex | 5 / 12 killed · 7 survived | 11 / 12 killed · 1 survived |
 
-| Engine | Build | Tests | Mutants killed | Survived | Instruction coverage | Branch coverage |
-|--------|-------|------:|----------------:|---------:|---------------------:|----------------:|
-| Claude | PASS | 20 | 5 / 12 | 7 | 97.42% | 100% |
-| Codex | PASS | 15 | 5 / 12 | 7 | 94.85% | 100% |
+All four suites built successfully and reported 100% branch coverage. Mutation
+testing revealed the difference: the suites generated with the skill detected
+10–11 of the 12 injected defects instead of 5.
 
-Both suites passed and reported 100% branch coverage, but each detected only 5
-of the 12 injected defects. The other 7 behavior changes went unnoticed.
-
-### With skill
-
-| Engine | Build | Tests | Mutants killed | Survived | Instruction coverage | Branch coverage |
-|--------|-------|------:|----------------:|---------:|---------------------:|----------------:|
-| Claude | PASS | 35 | 10 / 12 | 2 | 97.42% | 100% |
-| Codex | PASS | 26 | 11 / 12 | 1 | 100% | 100% |
-
-With the skill installed, Claude detected 10 of the 12 defects and Codex
-detected 11. All generated suites still passed against the original production
-code and reported 100% branch coverage.
-
-### What a mutant is
+<details>
+<summary><strong>What is a mutant?</strong></summary>
 
 A mutant is one deliberate, single-line change introduced into production code
-after the tests are written. The suite is then run against that changed code:
+after the tests are written. The suite is then run against that changed code.
 
-- **If the suite fails:** the mutant is killed. The tests detected the behavior
-  change.
-- **If the suite still passes:** the mutant survived. The tests executed the
-  affected code but did not assert anything that exposed the change.
+- If the suite fails, the mutant is killed.
+- If the suite still passes, the mutant survived.
 
-> **Benchmark scope:** These numbers describe one fixed benchmark scenario, not
-> a guarantee for every codebase or agent run. The benchmark harness, pinned
-> inputs, per-run evidence, and reproduction steps will be linked here when they
-> are published.
+</details>
+
+> **Benchmark scope:** One fixed scenario on a pinned Spring Petclinic target.
+> Results may vary across codebases, tasks, models, and runs.
 
 ## Installation
 
-**unit-tests-skills** is a collection of AI agent skills for generating high-quality unit tests. These skills encode battle-tested testing principles that work across any programming language.
+**unit-tests-skills** is a collection of AI agent skills for generating focused
+Java unit tests. It gives agents a repeatable workflow for planning coverage,
+generating tests, compiling them, and running them.
 
 ### Option 1: Using npx skills (Recommended)
 
@@ -216,9 +204,9 @@ plain **Command** after openskills or `npx skills`.
 
 This single command handles the full workflow:
 1. Analyzes the source code and outputs a structured list of test cases
-2. Asks you to review the test cases before proceeding
-3. Generates the actual test files
-4. Verifies compilation
+2. Generates the actual test files from that plan
+3. Verifies compilation
+4. Runs the tests and reports the result
 
 ### Analyze Test Coverage Only
 
