@@ -26,7 +26,7 @@
 <p align="center">
   <a href="https://github.com/mavka-ai/unit-tests-skills/stargazers"><img src="https://img.shields.io/github/stars/mavka-ai/unit-tests-skills?style=flat-square&amp;color=111111&amp;label=stars" alt="GitHub stars"></a>
   <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/plugin-2026.9.15-111111?style=flat-square" alt="Plugin version 2026.9.15"></a>
-  <a href="#testing-principles"><img src="https://img.shields.io/badge/Java-JUnit%205-111111?style=flat-square" alt="Java and JUnit 5"></a>
+  <a href="#supported-languages"><img src="https://img.shields.io/badge/Java-JUnit%205-111111?style=flat-square" alt="Java and JUnit 5"></a>
   <a href="#installation"><img src="https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Codex-111111?style=flat-square" alt="Works with Claude Code and Codex"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/mavka-ai/unit-tests-skills?style=flat-square&amp;color=111111&amp;label=license" alt="MIT license"></a>
 </p>
@@ -39,6 +39,20 @@
 <p align="center">
   <a href="#installation"><strong>Install the skills ↓</strong></a>
 </p>
+
+## Why
+
+An agent asked to "write tests" can stop as soon as the build is green. But a
+green suite with full branch coverage can still miss real defects: the
+benchmark below shows exactly that.
+
+These skills give the agent a testing process instead of a one-shot prompt:
+plan the cases from the code's branches, generate focused tests, compile them,
+and run them before reporting done. Use them when you:
+
+- add unit tests to an untested Java service or controller;
+- want to review the planned test cases before any test code is written;
+- want generated tests that follow consistent naming and structure rules.
 
 ## See the difference
 
@@ -78,10 +92,6 @@ after the tests are written. The suite is then run against that changed code.
 > Results may vary across codebases, tasks, models, and runs.
 
 ## Installation
-
-**unit-tests-skills** is a collection of AI agent skills for generating focused
-Java unit tests. It gives agents a repeatable workflow for planning coverage,
-generating tests, compiling them, and running them.
 
 ### Option 1: Using npx skills (Recommended)
 
@@ -127,6 +137,136 @@ Skills are namespaced by the plugin, so they are invoked as
 `/unit-tests-skills:generate-tests` and `/unit-tests-skills:generate-test-cases`.
 See [Updating and Uninstalling](#updating-and-uninstalling) to keep the
 installed plugin current or remove it.
+
+## Try it
+
+> Examples below use the plain command form. If you installed as a plugin,
+> prefix the skill name with the plugin: `/unit-tests-skills:generate-tests`.
+
+Generate tests for a class:
+
+```
+/generate-tests src/services/OrderService.java
+```
+
+Only plan the test cases, without generating code:
+
+```
+/generate-test-cases src/services/OrderService.java
+```
+
+### What you get
+
+#### Test Cases
+```
+## Test Cases for OrderService.calculateTotal
+
+### 1. calculateTotal_validProducts_returnsSum
+- **Given:** List with products priced at 50.0 and 100.0
+- **When:** calculateTotal() is called
+- **Then:** Returns 150.0
+- **Code branch:** Happy path
+
+### 2. calculateTotal_emptyList_throwsIllegalArgumentException
+- **Given:** Empty product list
+- **When:** calculateTotal() is called
+- **Then:** Throws IllegalArgumentException
+- **Code branch:** Validation - empty input
+```
+
+#### Generated Test
+```java
+@ExtendWith(MockitoExtension.class)
+class OrderServiceTest {
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    @Test
+    void calculateTotal_validProducts_returnsSum() {
+        // Given
+        var product1 = new Product("A", 50.0);
+        var product2 = new Product("B", 100.0);
+        when(productRepository.findAll()).thenReturn(List.of(product1, product2));
+
+        // When
+        double actualTotal = orderService.calculateTotal();
+
+        // Then
+        double expectedTotal = 150.0;
+        assertThat(actualTotal).isEqualTo(expectedTotal);
+    }
+}
+```
+
+## How it works
+
+`/generate-tests` runs the full workflow unattended:
+
+1. **Plan**: analyzes the source code and prints a structured list of test cases
+2. **Generate**: writes the test files from that plan
+3. **Compile**: verifies the tests compile
+4. **Run**: runs the tests and reports the result
+
+### Available skills
+
+| Skill | Command | Plugin command | Description |
+|-------|---------|----------------|-------------|
+| Generate Tests | `/generate-tests <target>` | `/unit-tests-skills:generate-tests <target>` | Full workflow, unattended: analyzes code, prints the test case list, generates test code, verifies it compiles and passes. Supports Java (JUnit 5, Mockito, AssertJ). |
+| Generate Test Cases | `/generate-test-cases <target>` | `/unit-tests-skills:generate-test-cases <target>` | Analysis only: outputs a structured list of test cases in Given-When-Then format without generating code. |
+
+Claude Code namespaces plugin skills by plugin name, so the command depends on
+how you installed. Use the **Plugin command** after
+[Option 3](#option-3-claude-code-plugin-recommended-for-claude-code); use the
+plain **Command** after openskills or `npx skills`.
+
+### Testing Principles
+
+These skills enforce proven testing practices:
+
+#### General Rules (All Languages)
+
+| Rule | Description |
+|------|-------------|
+| **Test Case Strategy** | Strict INCLUDE/EXCLUDE criteria - test each code branch, not collection sizes |
+| **Naming Conventions** | `{method}_{state}_{outcome}` format for clarity |
+| **Given-When-Then** | Clear structure with `actual`/`expected` prefixes |
+| **Keep Tests Focused** | One scenario per test, single responsibility |
+| **Test Behaviors** | Test what it does, not how it's implemented |
+| **No Logic in Tests** | KISS > DRY - use literal values, avoid calculations |
+| **Clean Test Data** | Use helpers and builders, never rely on defaults |
+| **Cause-Effect Clarity** | Setup belongs in the test, not in distant `@BeforeEach` |
+| **Public APIs First** | Test through public interfaces, not private methods |
+| **Verify Relevant Args** | Use `any()` for irrelevant arguments in mocks |
+
+## Supported agents
+
+- **Claude Code**: install as a plugin ([Option 3](#option-3-claude-code-plugin-recommended-for-claude-code)) or with `npx skills`.
+- **Codex and other agents that read `AGENTS.md`**: install with `npx skills` or openskills, and make sure your `AGENTS.md` references the skills.
+
+### Why AGENTS.md Matters
+
+| Configuration | Success Rate |
+|---------------|--------------|
+| Skills alone | 53% |
+| Skills + prompting | 79% |
+| **AGENTS.md** | **100%** |
+
+`AGENTS.md` provides persistent context to AI agents on every turn, without requiring them to decide to load skills first. See the [full article](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) for details.
+
+## Supported languages
+
+### Java
+
+- JUnit 5 + Mockito + AssertJ
+- `@ExtendWith(MockitoExtension.class)` for unit tests
+- **FORBIDDEN:** `@SpringBootTest` in unit tests
+- Use `ArgumentCaptor` instead of `any()` for DTOs
+- Explicit JSON literals (no `objectMapper.writeValueAsString()`)
+- `OutputCaptureExtension` for log verification
 
 ## Updating and Uninstalling
 
@@ -187,83 +327,24 @@ If you no longer use anything from the `mavka` marketplace, you can also remove
 the marketplace itself with `/plugin marketplace remove mavka`. Removing a
 marketplace also uninstalls plugins installed from it.
 
-## Why AGENTS.md Matters
+## Documentation
 
-| Configuration | Success Rate |
-|---------------|--------------|
-| Skills alone | 53% |
-| Skills + prompting | 79% |
-| **AGENTS.md** | **100%** |
+- [Google's unit test best practices](docs/google-unit-test-best-practices.md) —
+  source review and implementation status for the rules in this repository.
+- [The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
 
-`AGENTS.md` provides persistent context to AI agents on every turn, without requiring them to decide to load skills first. See the [full article](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) for details.
+## Contributing
 
-## Available Skills
+Contributions are welcome via Pull Requests. All PRs require review and approval from maintainers before merging.
 
-| Skill | Command | Plugin command | Description |
-|-------|---------|----------------|-------------|
-| Generate Tests | `/generate-tests <target>` | `/unit-tests-skills:generate-tests <target>` | Full workflow, unattended: analyzes code, prints the test case list, generates test code, verifies it compiles and passes. Supports Java (JUnit 5, Mockito, AssertJ). |
-| Generate Test Cases | `/generate-test-cases <target>` | `/unit-tests-skills:generate-test-cases <target>` | Analysis only: outputs a structured list of test cases in Given-When-Then format without generating code. |
+When adding new rules:
 
-Claude Code namespaces plugin skills by plugin name, so the command depends on
-how you installed. Use the **Plugin command** after
-[Option 3](#option-3-claude-code-plugin-recommended-for-claude-code); use the
-plain **Command** after openskills or `npx skills`.
+1. Place general rules in `skills/{skill-name}/rules/general/` (or `rules/tests/general/` for generate-tests)
+2. Place language-specific rules in `skills/generate-tests/rules/tests/{language}/unit/`
+3. Update skill files if new rules need explicit reference
+4. Ensure your changes follow the existing format and style
 
-## Usage
-
-> Examples below use the plain command form. If you installed as a plugin,
-> prefix the skill name with the plugin: `/unit-tests-skills:generate-tests`.
-
-### Generate Tests (Primary Skill)
-
-```
-/generate-tests src/services/OrderService.java
-```
-
-This single command handles the full workflow:
-1. Analyzes the source code and outputs a structured list of test cases
-2. Generates the actual test files from that plan
-3. Verifies compilation
-4. Runs the tests and reports the result
-
-### Analyze Test Coverage Only
-
-If you only want to see what test cases are needed without generating code:
-
-```
-/generate-test-cases src/services/OrderService.java
-```
-
-## Testing Principles
-
-These skills enforce proven testing practices:
-
-### General Rules (All Languages)
-
-| Rule | Description |
-|------|-------------|
-| **Test Case Strategy** | Strict INCLUDE/EXCLUDE criteria - test each code branch, not collection sizes |
-| **Naming Conventions** | `{method}_{state}_{outcome}` format for clarity |
-| **Given-When-Then** | Clear structure with `actual`/`expected` prefixes |
-| **Keep Tests Focused** | One scenario per test, single responsibility |
-| **Test Behaviors** | Test what it does, not how it's implemented |
-| **No Logic in Tests** | KISS > DRY - use literal values, avoid calculations |
-| **Clean Test Data** | Use helpers and builders, never rely on defaults |
-| **Cause-Effect Clarity** | Setup belongs in the test, not in distant `@BeforeEach` |
-| **Public APIs First** | Test through public interfaces, not private methods |
-| **Verify Relevant Args** | Use `any()` for irrelevant arguments in mocks |
-
-### Language-Specific Rules
-
-#### Java
-- JUnit 5 + Mockito + AssertJ
-- `@ExtendWith(MockitoExtension.class)` for unit tests
-- **FORBIDDEN:** `@SpringBootTest` in unit tests
-- Use `ArgumentCaptor` instead of `any()` for DTOs
-- Explicit JSON literals (no `objectMapper.writeValueAsString()`)
-- `OutputCaptureExtension` for log verification
-
-## Project Structure
+### Project Structure
 
 ```
 skills/
@@ -278,80 +359,7 @@ skills/
         └── post-generation/
 ```
 
-## Test Case Generation Strategy
-
-### INCLUDE
-- Each distinct code branch and outcome
-- Each unique return value or exception
-- Separate cases for HTTP 400, 401, 403 (never merge)
-- Each independent validation failure, nearest valid and invalid values at every boundary, and at least one all-valid input case (which may be a positive boundary case)
-- All paths through private methods (via public API)
-
-### EXCLUDE
-- Redundant input variations that add no distinct behavior, condition, or boundary coverage
-- Collection size variations (1, 2, 3 items) unless code has explicit size logic
-- Speculative cases (exotic Unicode, massive payloads) unless explicitly handled
-- Null arguments unless parameter is `@Nullable`
-
-## Example Output
-
-### Test Cases
-```
-## Test Cases for OrderService.calculateTotal
-
-### 1. calculateTotal_validProducts_returnsSum
-- **Given:** List with products priced at 50.0 and 100.0
-- **When:** calculateTotal() is called
-- **Then:** Returns 150.0
-- **Code branch:** Happy path
-
-### 2. calculateTotal_emptyList_throwsIllegalArgumentException
-- **Given:** Empty product list
-- **When:** calculateTotal() is called
-- **Then:** Throws IllegalArgumentException
-- **Code branch:** Validation - empty input
-```
-
-### Generated Test
-```java
-@ExtendWith(MockitoExtension.class)
-class OrderServiceTest {
-
-    @Mock
-    private ProductRepository productRepository;
-
-    @InjectMocks
-    private OrderService orderService;
-
-    @Test
-    void calculateTotal_validProducts_returnsSum() {
-        // Given
-        var product1 = new Product("A", 50.0);
-        var product2 = new Product("B", 100.0);
-        when(productRepository.findAll()).thenReturn(List.of(product1, product2));
-
-        // When
-        double actualTotal = orderService.calculateTotal();
-
-        // Then
-        double expectedTotal = 150.0;
-        assertThat(actualTotal).isEqualTo(expectedTotal);
-    }
-}
-```
-
-## Contributing
-
-Contributions are welcome via Pull Requests. All PRs require review and approval from maintainers before merging.
-
-When adding new rules:
-
-1. Place general rules in `skills/{skill-name}/rules/general/` (or `rules/tests/general/` for generate-tests)
-2. Place language-specific rules in `skills/generate-tests/rules/tests/{language}/unit/`
-3. Update skill files if new rules need explicit reference
-4. Ensure your changes follow the existing format and style
-
-## Repository Protection
+### Repository Protection
 
 This repository uses branch protection rules:
 - Direct pushes to `main` are disabled
@@ -372,12 +380,6 @@ Mavka AI; **Mavka AI**™ and the Mavka AI logo are used as unregistered marks. 
 marks are not licensed with the code. Referring to the project by name is fine;
 using them in your own product or fork's name is not. See
 [TRADEMARK.md](TRADEMARK.md) for the full policy.
-
-## Documentation
-
-- [Google's unit test best practices](docs/google-unit-test-best-practices.md) —
-  source review and implementation status for the rules in this repository.
-- [The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
 
 ## Built by Mavka AI
 
